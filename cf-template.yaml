@@ -271,7 +271,10 @@ Resources:
       SecurityGroupIds:
       - !Ref InstanceSecurityGroup   
       - !GetAtt VPC.DefaultSecurityGroup
-      SubnetId: !Ref PublicSubnet   
+      SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
       UserData:
         Fn::Base64:
           Fn::Sub:
