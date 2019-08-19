@@ -1,0 +1,12 @@
+{
+    "fabric": {
+        "chaincode": "letter-of-credit",
+        "channel": "awschannel",
+        "user": "admin",
+        "configfile": "./config/fabric_config.yaml"
+    },
+    "server": {
+        "address":"0.0.0.0",
+        "port":"3000"
+    }
+}

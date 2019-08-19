@@ -1,0 +1,19 @@
+Organizations:
+    - &Org1
+        Name: ###MEMBERID###
+        ID: ###MEMBERID###
+        MSPDir: /opt/aws-blockchain-letter-of-credit/msp
+        AnchorPeers:
+            - Host: 
+              Port: 
+
+Application: &ApplicationDefaults
+    Organizations:
+
+Profiles:
+    OneOrgChannel:
+        Consortium: AWSSystemConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
