@@ -1,0 +1,88 @@
+# Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# A copy of the License is located at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# or in the "license" file accompanying this file. This file is distributed 
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+# express or implied. See the License for the specific language governing 
+# permissions and limitations under the License.
+
+name: "letter-of-credit-network-config"
+x-type: "hlfv1"
+description: "Amazon Managed Blockchain fabric configuration"
+version: "1.0"
+
+client:
+  organization: Org1
+  logging:
+    level: warning
+  cryptoConfig: 
+    path: ""
+
+  # BCCSP config for the client. Used by GO SDK.
+  BCCSP:
+    security:
+     enabled: true
+     default:
+      provider: "SW"
+     hashAlgorithm: "SHA2"
+     softVerify: true
+     level: 256
+     
+channels:
+  ###CHANNEL###:
+    peers:
+      peer1:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+organizations:
+  Org1:
+    mspid: ###MEMBERID###
+    peers:
+      - peer1
+    cryptoPath: "/tmp/org1-crypto"
+    users:
+      admin:
+        cert:
+          pem: |-
+            ###ADMINCERTPEM###
+
+orderers:
+  orderer.com:
+    url: grpcs://###ORDERERURL###
+    grpcOptions:
+      ssl-target-name-override: ###ORDERER###
+    tlsCACerts:
+      pem: |-
+        ###AMBCERTPEM###
+
+peers:
+  peer1:
+    url: grpcs://###NODEURL###
+    eventUrl: grpcs://###NODEEVENTURL###
+    grpcOptions:
+      ssl-target-name-override: ###NODENAME###
+    tlsCACerts:
+      pem: |-
+        ###AMBCERTPEM###
+
+entityMatchers:
+  peer:
+    - pattern: (\w*)###NODENAME###(\w*)
+      urlSubstitutionExp: localhost:7051
+      eventUrlSubstitutionExp: localhost:7053
+      sslTargetOverrideUrlSubstitutionExp: ###NODENAME###
+      mappedHost: ###NODENAME###
+
+  orderer:
+    - pattern: (\w*)###ORDERER###(\w*)
+      urlSubstitutionExp: localhost:7050
+      sslTargetOverrideUrlSubstitutionExp: ###ORDERER###
+      mappedHost: ###ORDERER###
