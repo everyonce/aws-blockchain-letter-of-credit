@@ -8,6 +8,8 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import OI from 'react-object-inspector';
 import LabelImportant from '@material-ui/icons/LabelImportant';
+import Link from '@material-ui/icons/Link';
+import './LetterDetailBlock.css'
 
 const statusList=[
   {status:"NEW",desc:"Waiting on Selling Bank to CONFIRM receipt"},
@@ -86,7 +88,7 @@ export default class LetterDetailBlock extends Component {
               <div style={{display: 'flex', margin: '0px'}}>
               { statusList.map((x, i) => 
               {var c='green';   if (i===p) {c='yellow'} else if (i>p) {c='gray'}
-              return (<LabelImportant key={l.id + ':' + i} style={{ width:32, height:32, color: c,margin: '0px' }} />);
+              return (<Link classes='rotate-45' key={l.id + ':' + i} style={{ width:32, height:32, color: c,margin: '0px' }} />);
               })}
               </div>
               <Typography variant="body2"  color="primary" gutterBottom>
