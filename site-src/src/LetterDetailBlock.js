@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import OI from 'react-object-inspector';
 import LabelImportant from '@material-ui/icons/LabelImportant';
 import Link from '@material-ui/icons/Link';
+import CropSquare from '@material-ui/icons/CropSquareTwoTone';
 import './LetterDetailBlock.css'
 
 const statusList=[
@@ -22,7 +23,7 @@ const statusList=[
   {status:"CLOSED",desc:"No further actions needed"}
   ];
 
-const API = 'http://'+window.location.hostname+':3000/';
+const API = window.location+'/';
 const DEFAULT_QUERY = 'letter/';
 
 export default class LetterDetailBlock extends Component {
@@ -87,8 +88,12 @@ export default class LetterDetailBlock extends Component {
               </Typography>
               <div style={{display: 'flex', margin: '0px'}}>
               { statusList.map((x, i) => 
-              {var c='green';   if (i===p) {c='yellow'} else if (i>p) {c='gray'}
-              return (<Link classes='rotate-45' key={l.id + ':' + i} style={{ width:32, height:32, color: c,margin: '0px' }} />);
+              {var c='green'; var link='';  if (i===p) {c='yellow'} else if (i>p) {c='gray'}
+              if (i>0) {link=(<Link classes='rotate-45' key={l.id + ':' + i} style={{ width:40, height:40, 'z-index':-1, color: 'gray',margin: '14px -20' }} />)}
+              return (<React.Fragment>
+                 {link}
+                 <CropSquare key={l.id + ':' + i} style={{ width:64, height:64, 'z-index':5, color: c,margin: '0px' }} />
+                 </React.Fragment>);
               })}
               </div>
               <Typography variant="body2"  color="primary" gutterBottom>

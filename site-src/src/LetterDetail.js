@@ -14,7 +14,7 @@ import BarChartIcon from '@material-ui/icons/BarChart';
 import LayersIcon from '@material-ui/icons/Layers';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 
-const API = 'http://'+window.location.hostname+':3000/';
+const API = window.location+'/';
 const DEFAULT_QUERY = 'letter/';
 
 export default class LetterDetail extends Component {

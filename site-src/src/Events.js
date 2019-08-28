@@ -88,7 +88,7 @@ return (
           )})}
         </TableBody>
       </Table>
-      <Websocket url={'ws://'+window.location.hostname+':3000/ws'} onMessage={this.handleData.bind(this)}/>
+      <Websocket url={'ws://'+window.location.hostname+(window.location.port ? ':'+window.location.port: '')+'/ws'} onMessage={this.handleData.bind(this)}/>
     </React.Fragment>
      );
   }
