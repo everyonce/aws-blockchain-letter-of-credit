@@ -5,7 +5,7 @@ import List from '@material-ui/core/List';
 import LetterListItem from './LetterListItem';
 import ListSubheader from '@material-ui/core/ListSubheader';
 //import util from 'util';
-const API = 'http://'+window.location.hostname+':3000/';
+const API = window.location+'/';
 const DEFAULT_QUERY = 'listLetters';
 
 export default class LetterList extends Component {
