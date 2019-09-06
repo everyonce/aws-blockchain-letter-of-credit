@@ -144,8 +144,8 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 3000
-        ToPort: 3000
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: 22
@@ -292,7 +292,7 @@ Resources:
               git clone https://github.com/everyonce/aws-blockchain-letter-of-credit
               aws s3 cp s3://us-east-1.managedblockchain/etc/managedblockchain-tls-chain.pem  /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem
               cd /opt/aws-blockchain-letter-of-credit
-              git checkout version1.0
+              git checkout version1.1
 
               #export env variables, some filled in by cloudformation
               export CHANNEL=awschannel
@@ -375,7 +375,7 @@ Resources:
               docker build -t aws-amb-loc-demo .
 
               # run container in background
-              docker run -d --restart=always  -p 3000:3000 aws-amb-loc-demo
+              docker run -d --restart=always  -p 80:3000 aws-amb-loc-demo
 
             - REGION: !Ref "AWS::Region"
               NETWORKID: !GetAtt Member.NetworkId

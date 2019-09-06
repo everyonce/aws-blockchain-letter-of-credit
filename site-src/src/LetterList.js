@@ -4,8 +4,7 @@ import axios from 'axios';
 import List from '@material-ui/core/List';
 import LetterListItem from './LetterListItem';
 import ListSubheader from '@material-ui/core/ListSubheader';
-//import util from 'util';
-const API = window.location+'/';
+
 const DEFAULT_QUERY = 'listLetters';
 
 export default class LetterList extends Component {
@@ -19,13 +18,13 @@ export default class LetterList extends Component {
     };
     //this.handleChange = this.handleChange.bind(this);
     //globalLetterSelector={this.props.globalLetterSelector}
-    this.props.globalLetterSelector.func.refreshList.push(this.updateLetters.bind(this));
+    this.props.globalLetterSelector.refreshList.push(this.updateLetters.bind(this));
   }
   updateLetters() {
 
     //alert('LetterList.updateLetters');
     this.setState({ isLoading: true });
-    axios.get(API + DEFAULT_QUERY)
+    axios.get(this.props.config.apiUrl + '/' + DEFAULT_QUERY)
       .then(result => this.setState({
           letters: result.data,
           isLoading: false })
@@ -51,7 +50,7 @@ export default class LetterList extends Component {
             <List>
             <ListSubheader inset>Letter of Credit Records</ListSubheader>
             {letters.map(l =>
-              <LetterListItem globalLetterSelector={this.props.globalLetterSelector} letter={l} key={l.letterId} />
+              <LetterListItem config={this.props.config} globalLetterSelector={this.props.globalLetterSelector} letter={l} key={l.letterId} />
             )}
         </List>
         </React.Fragment>

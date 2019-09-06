@@ -213,7 +213,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["SELLERBANK"];
         if (action=="CONFIRM" && callerRoles.includes("SELLERBANK")) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="TERMS_SELLER_APPROVAL";
         } else {
@@ -228,7 +228,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
           console.log("Running APPROVE on letter " + letter.letterId + " as actor: " + actor);
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           console.log("approval records: " + util.inspect(letter.approvalRecord));
           console.log("actor Roles: " + util.inspect(actorRoles));
@@ -256,7 +256,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["SELLER"];
         if (action=="CONFIRM" && callerRoles.some(x=> actorRoles.includes(x))) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="SHIPPED";
         } else {
@@ -269,7 +269,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
           //CHECK FOR EXISTENCE OF REQUIRED AUTOMATIC RULES
           //CHECK FOR SIGNOFF ON MANUAL RULES
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="PACKET_SELLER_READY";
         } else if (action=="ADD_DOCUMENT" && callerRoles.some(x=> actorRoles.includes(x))) {
@@ -282,7 +282,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["SELLERBANK"];
         if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="PACKET_BUYER_READY";
         } else {
@@ -293,7 +293,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["BUYERBANK"];
         if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="CLOSED";
         } else {

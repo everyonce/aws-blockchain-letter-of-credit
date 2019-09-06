@@ -8,13 +8,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import PeopleIcon from '@material-ui/icons/People';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import LayersIcon from '@material-ui/icons/Layers';
-import AssignmentIcon from '@material-ui/icons/Assignment';
 
-const API = window.location+'/';
 const DEFAULT_QUERY = 'letter/';
 
 export default class LetterDetail extends Component {
@@ -33,7 +27,7 @@ export default class LetterDetail extends Component {
     
     if (letterId.length>0){
     this.setState({ isLoading: true });
-    axios.get(API + DEFAULT_QUERY + id)
+    axios.get(this.props.config.apiUrl + '/' + DEFAULT_QUERY + id)
       .then(result => this.setState({
           letter: result.data,
           isLoading: false })

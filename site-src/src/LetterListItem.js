@@ -18,8 +18,8 @@ export default class LetterListItem extends Component {
   render(){
     //alert("LLI we've got this as this.props.updateFunc: " + util.inspect(this.props.globalLetterSelector));
     var l = this.state.letter;
-    var func = this.props.globalLetterSelector.func.selectLetter;
-    var cb = this.props.globalLetterSelector.func.callbackList;
+    var func = this.props.globalLetterSelector.selectLetter;
+    var cb = this.props.globalLetterSelector.callbackList;
       return(
           <ListItem button onClick={ func(l.letterId, cb) } key={l.letterId}>
           <ListItemIcon>

@@ -50,7 +50,7 @@ export default class Events extends Component {
       }
       events.push(result);
       this.setState({events: events});
-      this.props.globalLetterSelector.func.needRefresh(this.props.globalLetterSelector.func.refreshList);
+      this.props.globalLetterSelector.func.needRefresh(this.props.globalLetterSelector.refreshList);
     } catch(e) {
         console.log("Couldn't parse ws data as json: "+e.toString());
     }
@@ -58,6 +58,7 @@ export default class Events extends Component {
 
   render() {
     const { events } = this.state;
+    console.log(util.inspect(this.props.config));
     return (
 
       <React.Fragment>
@@ -88,7 +89,7 @@ return (
           )})}
         </TableBody>
       </Table>
-      <Websocket url={'ws://'+window.location.hostname+(window.location.port ? ':'+window.location.port: '')+'/ws'} onMessage={this.handleData.bind(this)}/>
+      <Websocket url={this.props.config.wsUrl} onMessage={this.handleData.bind(this)}/>
     </React.Fragment>
      );
   }

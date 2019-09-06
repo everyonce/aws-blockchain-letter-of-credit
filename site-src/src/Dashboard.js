@@ -15,13 +15,20 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import LetterList from './LetterList';
+import TabBar from './TabBar';
 import Events from './Events';
 import DashboardTitle from './DashboardTitle';
 import LetterDetailBlock from './LetterDetailBlock';
-
+import util from 'util';
 const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
+
+  //<div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a></div>
+  //<div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a></div>
+  //<div>Icons made by <a href="https://www.flaticon.com/authors/good-ware" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a></div>
+  //<div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a></div>
+
   root: {
     display: 'flex',
   },
@@ -100,75 +107,17 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Dashboard(globalLetterSelector) {
-  
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+export default function Dashboard(props) {
+  var globalLetterSelector = props.globalLetterSelector;
+  var config = props.config;
+  var classes = useStyles();
+  console.log("in dashboard:" + util.inspect(config));
 
    return (
     <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-        <Toolbar className={classes.toolbar}>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="Open drawer"
-            onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-          >
-            <MenuIcon />
-          </IconButton>
-            <DashboardTitle classes={classes}/>
+      <TabBar  letters={props.letters} />
 
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <Divider />
-        <LetterList globalLetterSelector={globalLetterSelector}  />
 
-      </Drawer>
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={3}>
-
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <LetterDetailBlock globalLetterSelector={globalLetterSelector}/>
-              </Paper>
-            </Grid>
-            {/* Recent Orders */}
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Events  globalLetterSelector={globalLetterSelector}/>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </main>
     </div>
   );
 }

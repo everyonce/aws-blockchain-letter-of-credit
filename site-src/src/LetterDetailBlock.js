@@ -23,7 +23,6 @@ const statusList=[
   {status:"CLOSED",desc:"No further actions needed"}
   ];
 
-const API = window.location+'/';
 const DEFAULT_QUERY = 'letter/';
 
 export default class LetterDetailBlock extends Component {
@@ -35,8 +34,8 @@ export default class LetterDetailBlock extends Component {
       isLoading: false,
       error: null,
     };
-    this.props.globalLetterSelector.func.callbackList.push(this.updateLetter.bind(this));
-    this.props.globalLetterSelector.func.refreshList.push(this.updateLetter.bind(this));
+    this.props.globalLetterSelector.callbackList.push(this.updateLetter.bind(this));
+    this.props.globalLetterSelector.refreshList.push(this.updateLetter.bind(this));
   }
 
   updateLetter(newLetterId) {
@@ -47,7 +46,7 @@ export default class LetterDetailBlock extends Component {
       this.setState({
         letterId:newLetterId,
         isLoading:true});
-      axios.get(API + DEFAULT_QUERY + newLetterId)
+      axios.get(this.props.config.apiUrl + '/' + DEFAULT_QUERY + newLetterId)
       .then(result => this.setState({
           letter: result.data,
           isLoading: false })
@@ -89,7 +88,7 @@ export default class LetterDetailBlock extends Component {
               <div style={{display: 'flex', margin: '0px'}}>
               { statusList.map((x, i) => 
               {var c='green'; var link='';  if (i===p) {c='yellow'} else if (i>p) {c='gray'}
-              if (i>0) {link=(<Link classes='rotate-45' key={l.id + ':' + i} style={{ width:40, height:40, 'z-index':-1, color: 'gray',margin: '14px -20' }} />)}
+              if (i>0) {link=(<Link className='rotate-45' key={l.id + ':' + i} style={{ width:40, height:40, 'z-index':-1, color: 'gray',margin: '14px -20' }} />)}
               return (<React.Fragment>
                  {link}
                  <CropSquare key={l.id + ':' + i} style={{ width:64, height:64, 'z-index':5, color: c,margin: '0px' }} />

@@ -21,7 +21,7 @@ export default class DashboardTitle extends Component {
     var l = this.state.title;
       return(
         <Typography component="h1" variant="h6" color="inherit" noWrap className={this.props.classes.title}>
-          {l}
+          {l} (using API {this.props.config['apiUrl']})
         </Typography>
       )
   }
