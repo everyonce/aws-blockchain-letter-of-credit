@@ -34,14 +34,17 @@ export default function SingleLetter(props) {
 >
   <Grid item>
   <StatusChain statusList={statusList} letter={letter} letterId={props.letterId} /><br />
-        <Typography component="h3" gutterBottom>
-          Letter: {letter.letterDescription} <br />
+    <Typography  variant="h4" component="h4" gutterBottom style={{textAlign:"center"}}>
+        Next Step:<br/>
         </Typography>
+        <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"center"}}>
+        {statusList[statusList.findIndex(x=>x.status===letter.letterStatus)].desc}
+    </Typography>
   </Grid>   
   <Grid
     item
     container
-    sm={10}
+    sm={8}
     spacing={2}
     alignItems="flex-start"
     justify="center"
@@ -59,7 +62,6 @@ export default function SingleLetter(props) {
     <Typography gutterBottom>
         {props.letterId} <br />
           Status: {letter.letterStatus} <br />
-          Next: {statusList[statusList.findIndex(x=>x.status===letter.letterStatus)].desc}<br />
           {(letter.productDetails)?letter.productDetails.map((x) => 
                   <OI key={"product"+x.productSku} data={x} name={x.productSku}/>
                   ):'Cannot load, retry'

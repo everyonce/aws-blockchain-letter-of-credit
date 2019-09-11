@@ -12,6 +12,7 @@ import Paper from '@material-ui/core/Paper';
 import util from 'util';
 import SingleLetter from './SingleLetter';
 import CreateLetterPanel from './CreateLetterPanel';
+import WelcomeLetterPanel from './WelcomeLetterPanel';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -67,19 +68,24 @@ export default function TabBar(props) {
     <Paper square className={classes.root}>
       <AppBar className={classes.appbar} position="static" >
         <Tabs centered forceRenderTabPanel={true} value={selectedTab} onChange={handleChange} aria-label="simple tabs example">
+        <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} icon={<NoteAdd />} />
         {letters.map((l, index) =>
-                <Tab label={l.letterDescription} {...a11yProps(index)} key={"tabtop"+l.letterId} icon={<InsertDriveFile />} />
+                <Tab label={l.letterDescription} {...a11yProps(index+1)} key={"tabtop"+l.letterId} icon={<InsertDriveFile />} />
             )}
-            <Tab label='Create' {...a11yProps(letters.length)} key={"tabtop-create"} icon={<NoteAdd />} />
+            <Tab label='Create' {...a11yProps(letters.length+1)} key={"tabtop-create"} icon={<NoteAdd />} />
         </Tabs>
       </AppBar>
+      <TabPanel value={selectedTab} index={0} key='welcome-letter-tab-panel' >
+            <WelcomeLetterPanel config={props.config} />
+        </TabPanel>
+
       {letters.map((l, index) =>
-           <TabPanel value={selectedTab} index={index} key={'tabpanel-'+l.letterId}>
+           <TabPanel value={selectedTab} index={index+1} key={'tabpanel-'+l.letterId}>
              <SingleLetter key={'singleletter-'+l.letterId} config={props.config} letterId={l.letterId} />
             </TabPanel>
          )}
-        <TabPanel value={selectedTab} index={letters.length} key='create-letter-tab-panel' >
-            <CreateLetterPanel />
+        <TabPanel value={selectedTab} index={letters.length+1} key='create-letter-tab-panel' >
+            <CreateLetterPanel config={props.config} />
         </TabPanel>
     </Paper>
   );

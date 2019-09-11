@@ -10,6 +10,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import util from 'util';
 import AddProducts from './CreateLetterPanelProducts';
+import AddRules from './CreateLetterPanelRules';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -23,15 +24,17 @@ const useStyles = makeStyles(theme => ({
   
 export default function CreateLetterApp(props) {
     const classes = useStyles();
-    const [value, setValue] = React.useState(0);
+    const [complete, setComplete] = React.useState(false);
     let products = [];
+    let rules = [];
         return (
             <Container maxWidth="sm">
             <Formik
-            initialValues={{ product: products, description: '', name: '', comment: '' }}
+            initialValues={{ product: products, rule: rules, description: '', name: '', comment: '' }}
             onSubmit={(values, { setSubmitting,  }) => {
              setSubmitting(true);
-            /*    axios.post(contactFormEndpoint,
+             //values.letterId = new Guid();
+             axios.post(props.config.apiUrl + '/createLetter',
                 values,
                 {
                   headers: {
@@ -40,9 +43,9 @@ export default function CreateLetterApp(props) {
                   }
                 },
               ).then((resp) => {
-                setSubmitionCompleted(true);
+                setComplete(true);
               }
-              );*/
+              );
               alert(util.inspect(values));
               setSubmitting(false);
             }}
@@ -63,7 +66,7 @@ export default function CreateLetterApp(props) {
                 <form onSubmit={handleSubmit}>
                     <div>
                   <TextField
-                    label="description"
+                    label="Supplier Name/Description"
                     name="description"
                     className={classes.textField}
                     value={values.description}
@@ -71,12 +74,12 @@ export default function CreateLetterApp(props) {
                     onBlur={handleBlur}
                     helperText={(errors.description && touched.description) && errors.description}
                     margin="normal"
+                    style={{width:'400px'}}
                   />
                     </div>
                     <div>
                   <TextField
-                    error={errors.price && touched.price}
-                    label="price"
+                    label="Total Price"
                     name="price"
                     className={classes.textField}
                     value={values.price}
@@ -84,11 +87,12 @@ export default function CreateLetterApp(props) {
                     onBlur={handleBlur}
                     helperText={(errors.price && touched.price) && errors.price}
                     margin="normal"
+                    style={{width:'400px'}}
                   />
 </div>
                     <div>
                   <TextField
-                    label="comment"
+                    label="Comment"
                     name="comment"
                     className={classes.textField}
                     value={values.comment}
@@ -96,10 +100,12 @@ export default function CreateLetterApp(props) {
                     onBlur={handleBlur}
                     helperText={(errors.comment && touched.comment) && errors.comment}
                     margin="normal"
+                    style={{width:'400px'}}
                   />
                   </div>
-<AddProducts  handleChange={handleChange} handleBlur={handleBlur}  values={values}  errors={errors} touched={touched} dirty={dirty} classes={classes} />
-                   <DialogActions>
+                  <AddProducts  handleChange={handleChange} handleBlur={handleBlur}  values={values}  errors={errors} touched={touched} dirty={dirty} classes={classes} />
+                  <AddRules     handleChange={handleChange} handleBlur={handleBlur}  values={values}  errors={errors} touched={touched} dirty={dirty} classes={classes} />
+                  <DialogActions>
                     <Button
                       type="button"
                       className="outline"

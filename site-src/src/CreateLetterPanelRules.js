@@ -10,49 +10,37 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import util from 'util';
 
-export default function AddProducts(props) {
+export default function AddRules(props) {
   //var values=props.values;
 
   return (
 <div>     
 <FieldArray
-    name='product'
+    name='rule'
     render={arrayHelpers => ( 
         <React.Fragment>
-        {props.values.product.map((product, index) => (          
+        {props.values.rule.map((rule, index) => (          
         <div key={index} >
-    
             <Field
-                name={`product.${index}`} 
+                name={`rule.${index}`} 
                 render={({ field /* _form */ }) => (
                     <React.Fragment>
                   <TextField
                     {...field}
-                    label={`Product Name`}
-                    name={`product.${index}.name`}
+                    label={`Rule Text`}
+                    name={`rule.${index}.text`}
                     className={props.classes.textField}
-                    value={product.name}
+                    value={rule.text}
                     onChange={props.handleChange}
                     onBlur={props.handleBlur}
-                    helperText={(props.errors[`product.${index}.quantity`] && props.touched[`product.${index}.quantity`]) && props.errors[`product.${index}.quantity`]}
+                    helperText={(props.errors[`rule.${index}.quantity`] && props.touched[`rule.${index}.quantity`]) && props.errors[`rule.${index}.quantity`]}
                     margin="normal"
-                  />
-
-                  <TextField
-                    {...field}
-                    label={`Product Quantity`}
-                    name={`product.${index}.quantity`}
-                    className={props.classes.textField}
-                    value={product.quantity}
-                    onChange={props.handleChange}
-                    onBlur={props.handleBlur}
-                    helperText={(props.errors[`product.${index}.quantity`] && props.touched[`product.${index}.quantity`]) && props.errors[`product.${index}.quantity`]}
-                    margin="normal"
+                    style={{width:'400px'}}
                   />
                   </React.Fragment>
                 )}
             />
-            <Tooltip title="Remove this product">
+            <Tooltip title="Remove this rule">
             <button 
                 type="button"
                 style={{verticalAlign:"bottom", margin:"15px"}}
@@ -63,13 +51,13 @@ export default function AddProducts(props) {
             </Tooltip>
         </div>
     ))}
-<Tooltip title="Add a product">
+<Tooltip title="Add a rule">
     <button 
         type="button"
         style={{verticalAlign:"bottom", margin:"15px"}}
         onClick={() => arrayHelpers.push('')}
         >
-        Add Product
+        Add Rule
     </button>
     </Tooltip>
     </React.Fragment>

@@ -18,7 +18,8 @@ function ShowActor(props) {
         alignItems: 'flex-start',
         direction: 'column',
         textAlign: 'center',
-        padding: '10px'
+        padding: '10px',
+        color: '#777777'
     };
     let bs={
         backgroundColor: '#005A95',
@@ -31,6 +32,7 @@ function ShowActor(props) {
     if (actorCan) {
         s.border= '2px solid #005A95';
         s.backgroundColor='#ECF7FF';
+        s.color='#005A95';
         sel=true;
         actorActions = actorCan[props.actor];
         console.log(util.inspect(s));
