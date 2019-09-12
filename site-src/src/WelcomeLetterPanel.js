@@ -23,12 +23,21 @@ const useStyles = makeStyles(theme => ({
     }
   }));
 
+
 export default function CreateWelcomePage(props) {
     const networkConstants = NetworkConstants();
     const classes = useStyles();
-    const [complete, setComplete] = React.useState(false);
-    let products = [];
-    let rules = [];
+    const [deleting, setDeleting] = React.useState(false);
+    let deleteAll=(values) => {
+      setDeleting(true);
+      axios.get(props.config.apiUrl + '/deleteAllLetters'
+       ).then((resp) => {
+        setDeleting(false);
+        alert("done deleting: " + util.inspect(resp));
+       }
+       );
+
+     };
         return (
             <Container maxWidth="sm">
             <Typography variant="h4" gutterBottom>
@@ -52,6 +61,8 @@ export default function CreateWelcomePage(props) {
                     <Button
                       type="button"
                       className="outline"
+                      onClick={deleteAll}
+                      disabled={deleting}
                     >
                       Delete All Letters
                     </Button>

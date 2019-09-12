@@ -372,6 +372,13 @@ Resources:
               # build api+web container
               cd ..
               mv site-src/build ./site
+              cat << EOF > ./site/NetworkConstants.js
+              #!/bin/bash
+              export default function NetworkConstants() { return {
+                "NetworkId":"$NETWORKID",
+                "MemberId":"$MEMBERID"
+              }};
+              EOF
               docker build -t aws-amb-loc-demo .
 
               # run container in background
