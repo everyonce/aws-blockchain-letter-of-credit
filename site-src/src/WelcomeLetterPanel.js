@@ -11,6 +11,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import util from 'util';
 import AddProducts from './CreateLetterPanelProducts';
 import AddRules from './CreateLetterPanelRules';
+import NetworkConstants from './NetworkConstants';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -23,16 +24,22 @@ const useStyles = makeStyles(theme => ({
   }));
 
 export default function CreateWelcomePage(props) {
+    const networkConstants = NetworkConstants();
     const classes = useStyles();
     const [complete, setComplete] = React.useState(false);
     let products = [];
     let rules = [];
         return (
             <Container maxWidth="sm">
-            <Typography>
-              TBD Nice Wording
+            <Typography variant="h4" gutterBottom>
+              Amazon Managed Blockchain<br />
+              Letter of Credit Demo
             </Typography>
-            <Typography>
+            <Typography variant="h6" gutterBottom>
+              Network ID: {networkConstants.NetworkId}<br />
+              Member ID: {networkConstants.MemberId}
+            </Typography>
+            <Typography gutterBottom>
               Welcome to the demo Letter of Credit on Amazon Managed Blockchain!  You can use the buttons below to quickly create some demo LoCs, or use the last tab to create one specific to your demo needs.
             </Typography>
             <DialogActions>

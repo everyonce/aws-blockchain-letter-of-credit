@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import NoteAdd from '@material-ui/icons/NoteAdd';
 import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
+import Announcement from '@material-ui/icons/Announcement';
 import Paper from '@material-ui/core/Paper';
 import util from 'util';
 import SingleLetter from './SingleLetter';
@@ -68,7 +69,7 @@ export default function TabBar(props) {
     <Paper square className={classes.root}>
       <AppBar className={classes.appbar} position="static" >
         <Tabs centered forceRenderTabPanel={true} value={selectedTab} onChange={handleChange} aria-label="simple tabs example">
-        <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} icon={<NoteAdd />} />
+        <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} icon={<Announcement />} />
         {letters.map((l, index) =>
                 <Tab label={l.letterDescription} {...a11yProps(index+1)} key={"tabtop"+l.letterId} icon={<InsertDriveFile />} />
             )}
