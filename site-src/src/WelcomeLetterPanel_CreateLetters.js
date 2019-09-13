@@ -1,6 +1,6 @@
 
 export default function SampleLetters(memberId) { 
-    return 
+    return (
 [
 {
     "letterId": (new Guid()),
@@ -53,9 +53,50 @@ export default function SampleLetters(memberId) {
   },
 
 
-
+  {
+    "letterId": (new Guid()),
+    "letterDescription": "Widgets Int'l",
+    "letterTotalPayment": "",
+    "productDetails": [
+      { "productSku": "SpinToy",
+        "quantity": "1000",
+        "quantity_unit": "CASE_1000_PER",
+        "delivery": "freight"}
+    ],
+    "rules": [
+      { "ruleNum": "1",
+        "ruleType": "autoMetrics",
+        "metric": "SKU_SCAN",
+        "metricRuleOperation": "EQ",
+        "metricRuleThreshold": "100%",
+        "metricProviders": [
+          {
+            "role": "THIRDPARTY",
+            "mspid": memberId,
+            "org": "DemoOrg"
+          }
+        ] }
+    ],
+    "roleIdentities": [
+      { "role": "SELLER",
+        "mspid": memberId,
+        "org": "DemoOrg" },
+      { "role": "SELLERBANK",
+        "mspid": memberId,
+        "org": "DemoOrg"},
+      { "role": "BUYER",
+        "mspid": memberId,
+        "org": "DemoOrg"},
+      { "role": "BUYERBANK",
+        "mspid": memberId,
+        "org": "DemoOrg"},
+      { "role": "THIRDPARTY",
+        "mspid": memberId,
+        "org": "DemoOrg" }
+    ]
+  },
 
 ]
 
 
-};
+    )};

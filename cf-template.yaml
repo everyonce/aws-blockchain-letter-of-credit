@@ -372,13 +372,20 @@ Resources:
               # build api+web container
               cd ..
               mv site-src/build ./site
+
+              #need to build network constants for the react site
               cat << EOF > ./site/NetworkConstants.js
               #!/bin/bash
               export default function NetworkConstants() { return {
-                "NetworkId":"$NETWORKID",
-                "MemberId":"$MEMBERID"
+                "NetworkId":"###NODEURL###",
+                "MemberId":"###MEMBERID###"
               }};
               EOF
+              
+              #replacements in peer env file
+              sed -i -e "s/###NODEURL###/$NODEURL/g" config/peer.env
+              sed -i -e "s/###MEMBERID###/$MEMBERID/g" config/peer.env
+
               docker build -t aws-amb-loc-demo .
 
               # run container in background

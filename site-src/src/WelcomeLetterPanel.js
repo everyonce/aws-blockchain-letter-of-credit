@@ -28,6 +28,7 @@ export default function CreateWelcomePage(props) {
     const networkConstants = NetworkConstants();
     const classes = useStyles();
     const [deleting, setDeleting] = React.useState(false);
+    const [creating, setCreating] = React.useState(false);
     let deleteAll=(values) => {
       setDeleting(true);
       axios.get(props.config.apiUrl + '/deleteAllLetters'
@@ -36,7 +37,16 @@ export default function CreateWelcomePage(props) {
         alert("done deleting: " + util.inspect(resp));
        }
        );
-
+     };
+     let createAll=(values) => {
+      setCreating(true);
+      
+      axios.get(props.config.apiUrl + '/createLetter'
+       ).then((resp) => {
+        setCreating(false);
+        alert("done creating: " + util.inspect(resp));
+       }
+       );
      };
         return (
             <Container maxWidth="sm">
