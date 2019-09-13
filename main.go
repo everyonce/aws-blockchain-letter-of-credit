@@ -304,6 +304,8 @@ func runCC(w http.ResponseWriter, r *http.Request, method string, functionName s
 	}
 
 	if err != nil {
+		log.Printf("Error from fabric client: %v", err)
+		+log.Printf("Request was: %v", req)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return

@@ -361,6 +361,20 @@ Resources:
 
               # build static html site
               cd site-src
+              #need to build network constants for the react site
+              rm ./src/NetworkConstants.js
+              cat << EOF > ./src/NetworkConstants.js
+              export default function NetworkConstants() { return {
+                "NetworkId":"###NETWORKID###",
+                "MemberId":"###MEMBERID###"
+              }};
+              EOF
+              
+              #replacements in peer env file
+              sed -i -e "s/###NETWORKID###/$NETWORKID/g" ./src/NetworkConstants.js
+              sed -i -e "s/###MEMBERID###/$MEMBERID/g" ./src/NetworkConstants.js
+
+
               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -373,18 +387,6 @@ Resources:
               cd ..
               mv site-src/build ./site
 
-              #need to build network constants for the react site
-              cat << EOF > ./site/NetworkConstants.js
-              #!/bin/bash
-              export default function NetworkConstants() { return {
-                "NetworkId":"###NODEURL###",
-                "MemberId":"###MEMBERID###"
-              }};
-              EOF
-              
-              #replacements in peer env file
-              sed -i -e "s/###NODEURL###/$NODEURL/g" config/peer.env
-              sed -i -e "s/###MEMBERID###/$MEMBERID/g" config/peer.env
 
               docker build -t aws-amb-loc-demo .
 

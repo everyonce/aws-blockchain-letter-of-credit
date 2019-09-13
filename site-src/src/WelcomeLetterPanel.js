@@ -12,6 +12,7 @@ import util from 'util';
 import AddProducts from './CreateLetterPanelProducts';
 import AddRules from './CreateLetterPanelRules';
 import NetworkConstants from './NetworkConstants';
+import SampleLetters from './WelcomeLetterPanel_SampleLetters';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -40,8 +41,8 @@ export default function CreateWelcomePage(props) {
      };
      let createAll=(values) => {
       setCreating(true);
-      
-      axios.get(props.config.apiUrl + '/createLetter'
+      let newLetters = SampleLetters(NetworkConstants.MemberId);
+      axios.post(props.config.apiUrl + '/createLetter', newLetters
        ).then((resp) => {
         setCreating(false);
         alert("done creating: " + util.inspect(resp));
@@ -65,6 +66,8 @@ export default function CreateWelcomePage(props) {
                     <Button
                       type="button"
                       className="outline"
+                      onClick={createAll}
+                      disabled={creating}
                     >
                       Create Some Demo Letters
                     </Button>
