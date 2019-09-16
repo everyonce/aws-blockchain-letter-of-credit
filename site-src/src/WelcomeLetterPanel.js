@@ -42,12 +42,14 @@ export default function CreateWelcomePage(props) {
      let createAll=(values) => {
       setCreating(true);
       let newLetters = SampleLetters(NetworkConstants.MemberId);
-      axios.post(props.config.apiUrl + '/createLetter', newLetters
-       ).then((resp) => {
-        setCreating(false);
-        alert("done creating: " + util.inspect(resp));
-       }
-       );
+      newLetters.forEach(newLetter => {
+        axios.post(props.config.apiUrl + '/createLetter', newLetter
+        ).then((resp) => {
+          setCreating(false);
+          alert("done creating: " + util.inspect(resp));
+        }
+        );
+      })
      };
         return (
             <Container maxWidth="sm">
