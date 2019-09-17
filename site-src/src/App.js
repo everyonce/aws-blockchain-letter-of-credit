@@ -4,6 +4,8 @@ import Box from '@material-ui/core/Box';
 import Link from '@material-ui/core/Link';
 import React, {Component} from 'react';
 import TabBar from './TabBar';
+import Websocket from 'react-websocket';
+
 
 import axios from 'axios';
 import util from 'util';
@@ -13,7 +15,8 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      title:"Blockchain Dashboard"
+      title:"Blockchain Dashboard",
+      isLoading: false, letters: [], error: null 
     };
     this.props=props;
   }
@@ -41,7 +44,10 @@ export default class App extends Component {
     if (this.state.isLoading) return (<div>LOADING</div>);
     if (this.state.error) return (<div>{util.inspect(this.state.error)}</div>);
     return (
-          <TabBar letters={this.state.letters} config={this.config} />
+      <React.Fragment>      
+        <Websocket url={this.config.wsUrl} onMessage={(event) => alert(event)}/>
+        <TabBar letters={this.state.letters} config={this.config} />
+      </React.Fragment>
     );
   }
 }
