@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
-	"net/url"
 	"time"
 	"unicode/utf8"
 
@@ -273,13 +271,6 @@ func (s *serverType) httpLetterDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func runCC(w http.ResponseWriter, r *http.Request, method string, functionName string, args [][]byte) {
-	/*	if (r.Method != http.MethodPost && method == "invoke") ||
-		(r.Method != http.MethodGet && method == "query") {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("400: Bad Request"))
-		return
-	}*/
-
 	var (
 		response channel.Response
 		req      channel.Request
@@ -413,51 +404,54 @@ func equalASCIIFold(s, t string) bool {
 var defaultPorts = map[string]string{"http": "80", "https": "443"}
 
 func checkSameOrigin(r *http.Request) bool {
-	origin := r.Header["Origin"]
-	//log.Printf("Checking CORS ORigin: %s", origin)
-	if len(origin) == 0 {
-		return true
-	}
-	u, err := url.Parse(origin[0])
-	//log.Printf("Checking CORS Origin: %s", u)
+	return true //temp for testing
+	/*
+		origin := r.Header["Origin"]
+		//log.Printf("Checking CORS ORigin: %s", origin)
+		if len(origin) == 0 {
+			return true
+		}
+		u, err := url.Parse(origin[0])
+		//log.Printf("Checking CORS Origin: %s", u)
 
-	if err != nil {
+		if err != nil {
+			return false
+		}
+		if equalASCIIFold(u.Host, r.Host) {
+			return true
+		}
+
+		host1, _, err := net.SplitHostPort(u.Host)
+		host2, _, err := net.SplitHostPort(r.Host)
+
+		if equalASCIIFold(host1, host2) {
+			return true
+		}
+
+		defaultPort, ok := defaultPorts[u.Scheme]
+		//log.Printf("Checking CORS Origin: %s", defaultPort)
+
+		if !ok {
+			return false
+		}
+
+		host, port, err := net.SplitHostPort(u.Host)
+
+		if err == nil {
+			match := port == defaultPort && equalASCIIFold(host, r.Host)
+			log.Printf("Websocket Upgrade CORS: ports match (%s, %s) and (request) hosts match (%s, %s): %v", port, defaultPort, host, r.Host, match)
+			return match
+		}
+
+		host, port, err = net.SplitHostPort(r.Host)
+		if err == nil {
+			match := port == defaultPort && equalASCIIFold(u.Host, host)
+			log.Printf("Websocket Upgrade CORS: ports match (%s, %s) and (origin) hosts match (%s, %s): %v", port, defaultPort, host, r.Host, match)
+			return match
+		}
+
 		return false
-	}
-	if equalASCIIFold(u.Host, r.Host) {
-		return true
-	}
-
-	host1, _, err := net.SplitHostPort(u.Host)
-	host2, _, err := net.SplitHostPort(r.Host)
-
-	if equalASCIIFold(host1, host2) {
-		return true
-	}
-
-	defaultPort, ok := defaultPorts[u.Scheme]
-	//log.Printf("Checking CORS Origin: %s", defaultPort)
-
-	if !ok {
-		return false
-	}
-
-	host, port, err := net.SplitHostPort(u.Host)
-
-	if err == nil {
-		match := port == defaultPort && equalASCIIFold(host, r.Host)
-		log.Printf("Websocket Upgrade CORS: ports match (%s, %s) and (request) hosts match (%s, %s): %v", port, defaultPort, host, r.Host, match)
-		return match
-	}
-
-	host, port, err = net.SplitHostPort(r.Host)
-	if err == nil {
-		match := port == defaultPort && equalASCIIFold(u.Host, host)
-		log.Printf("Websocket Upgrade CORS: ports match (%s, %s) and (origin) hosts match (%s, %s): %v", port, defaultPort, host, r.Host, match)
-		return match
-	}
-
-	return false
+	*/
 }
 
 var upgrader = websocket.Upgrader{
