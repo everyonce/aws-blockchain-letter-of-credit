@@ -1,7 +1,3 @@
-import Container from '@material-ui/core/Container';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import Link from '@material-ui/core/Link';
 import React, {Component} from 'react';
 import TabBar from './TabBar';
 import Websocket from 'react-websocket';

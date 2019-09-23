@@ -134,6 +134,9 @@ async deleteAllLetters(stub) {
       if (jsonRes.Record.docType == 'letter') {
         console.log('##### DELETING: ' + util.inspect(res.value.key));
         await stub.deleteState(res.value.key);
+        var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"SUCCESS","action":"DELETE","caller":caller.mspid}));
+        stub.setEvent("letterAction",resultAsBytes);  
+  
       }
       if (res.done) {
         console.log('end of data - closing iterator');
@@ -181,21 +184,13 @@ async listLetters(stub, args) {
 }
 async action(stub, args) {
   try {
-    //var force=false;
-    console.log("Incoming full: " + util.inspect(args));
-    console.log("Incoming arg0: " + util.inspect(args[0]));
-    console.log("Incoming json: " + util.inspect(JSON.parse(args[0])));
     let incoming = JSON.parse(args[0]);
     let key = 'LETTER.' + incoming["letterId"];
     let action = incoming["action"];
     let letterAsBytes = await stub.getState(key);
-
-    console.log("got letter: " + letterAsBytes.toString());
-    console.log("using key: " + key);
-if (!letterAsBytes || letterAsBytes.length==0) {
-
-  throw new Error("couldn't find "+key);
-}
+    if (!letterAsBytes || letterAsBytes.length==0) {
+      throw new Error("couldn't find "+key);
+    }
     let letter = JSON.parse(letterAsBytes.toString());
     var caller = stub.getCreator();
     let callerRoles = letter.roleIdentities.filter(role => role.mspid==caller.mspid).map(y => y.role).reduce((a, b) => a.concat(b), []);

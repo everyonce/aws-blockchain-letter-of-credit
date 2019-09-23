@@ -1,16 +1,11 @@
 import React from 'react';
-import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
-import * as Yup from 'yup';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import util from 'util';
-import AddProducts from './CreateLetterPanelProducts';
-import AddRules from './CreateLetterPanelRules';
 import NetworkConstants from './NetworkConstants';
 import SampleLetters from './WelcomeLetterPanel_SampleLetters';
 
@@ -27,7 +22,6 @@ const useStyles = makeStyles(theme => ({
 
 export default function CreateWelcomePage(props) {
     const networkConstants = NetworkConstants();
-    const classes = useStyles();
     const [deleting, setDeleting] = React.useState(false);
     const [creating, setCreating] = React.useState(false);
     let deleteAll=(values) => {
@@ -35,7 +29,7 @@ export default function CreateWelcomePage(props) {
       axios.get(props.config.apiUrl + '/deleteAllLetters'
        ).then((resp) => {
         setDeleting(false);
-        alert("done deleting: " + util.inspect(resp));
+        //alert("done deleting: " + util.inspect(resp));
        }
        );
      };
@@ -46,7 +40,7 @@ export default function CreateWelcomePage(props) {
         axios.post(props.config.apiUrl + '/createLetter', newLetter
         ).then((resp) => {
           setCreating(false);
-          alert("done creating: " + util.inspect(resp));
+          //alert("done creating: " + util.inspect(resp));
         }
         );
       })
