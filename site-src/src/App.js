@@ -25,6 +25,9 @@ export default class App extends Component {
              wsUrl :(process.env.REACT_APP_WS_URL)?process.env.REACT_APP_WS_URL:
             'ws://'+window.location.hostname+(window.location.port ? ':'+window.location.port: '')+'/ws'};
 
+  wsEvent = (event) => {
+    alert("Got this from the websocket: " + event);
+  }
   updateLetters = () => {
     this.setState({ isLoading: true, letters: [], error: null });
     axios.get(this.config.apiUrl + '/listLetters')
@@ -45,7 +48,7 @@ export default class App extends Component {
     if (this.state.error) return (<div>{util.inspect(this.state.error)}</div>);
     return (
       <React.Fragment>      
-        <Websocket url={this.config.wsUrl} onMessage={(event) => alert(event)}/>
+        <Websocket url={this.config.wsUrl} onMessage={(event) => this.wsEvent(event)}/>
         <TabBar letters={this.state.letters} config={this.config} />
       </React.Fragment>
     );

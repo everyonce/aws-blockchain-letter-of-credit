@@ -2,6 +2,7 @@ import React from 'react';
 import {BankIcon, PersonIcon} from './Icons';
 import getStatusTypes from './LetterStatusTypes';
 import util from 'util';
+import axios from 'axios';
 import { Typography, Button, Paper, Grid } from '@material-ui/core';
 
 function ActorIcon(props) {
@@ -10,8 +11,27 @@ function ActorIcon(props) {
     return (<PersonIcon sel={props.sel} height={'80px'} width={'80px'} />);
 }
 
+
+
 export default 
 function ShowActor(props) {
+    const [working, setWorking] = React.useState();
+
+    const doAction = (event) => {
+        setWorking(true);
+        console.log(util.inspect(event.currentTarget));
+        axios.post(props.config.apiUrl + '/action', 
+        {"letterId":letter.letterId,
+            "action":event.currentTarget.value}
+        ).then((resp) => {
+          console.log("sent action, here's response: " + util.inspect(resp));
+          setWorking(false);
+        }
+        );
+        
+        return;
+    }
+
     let letter = props.letter
     let sel=false;
     let s={ 
@@ -43,7 +63,7 @@ function ShowActor(props) {
             <ActorIcon sel={sel} {...props} /><br />
             <Typography>{props.actor}</Typography><br />
             {actorActions.map(x=>
-                <Button style={bs}>{x}</Button>
+                <Button disabled={working} value={x} onClick={doAction} style={bs}>{x}</Button>
             )}
         </div>
     );

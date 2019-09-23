@@ -55,7 +55,7 @@ export default function SingleLetter(props) {
             {actor:"Seller", icon:"person"},
         ].map(x => 
             <Grid item xs={6} sm={3} justify="center">
-                <ShowActor actor={x.actor} icon={x.icon} letter={letter} />
+                <ShowActor config={props.config} actor={x.actor} icon={x.icon} letter={letter} />
             </Grid> )}
     </Grid>
     <Grid item>
