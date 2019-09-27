@@ -134,12 +134,12 @@ async deleteAllLetters(stub) {
       if (jsonRes.Record.docType == 'letter') {
         console.log('##### DELETING: ' + util.inspect(res.value.key));
         await stub.deleteState(res.value.key);
-        var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"SUCCESS","action":"DELETE","caller":caller.mspid}));
-        stub.setEvent("letterAction",resultAsBytes);  
-  
       }
       if (res.done) {
         console.log('end of data - closing iterator');
+        var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));
+        stub.setEvent("letterAction",resultAsBytes);  
+
         await iterator.close();
         return;
       }
@@ -196,8 +196,8 @@ async action(stub, args) {
     let callerRoles = letter.roleIdentities.filter(role => role.mspid==caller.mspid).map(y => y.role).reduce((a, b) => a.concat(b), []);
     console.log(">>> ACTION: "+ "Caller: " + caller.mspid + ", Action: " + action + ", Status: " + letter.letterStatus + ", MSP-roles:"+callerRoles.join(","));
     let badAction = function(){
-      var errorText="{'error':'Caller: " + caller.mspid + " not permitted to " + action + " while letter status is " + letter.letterStatus + "'}";
-      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"SUCCESS","action":action,"caller":caller.mspid,"newStatus":letter.letterStatus}));
+      var errorText="{'error':'Caller: " + caller.mspid + "(ROLES: " + callerRoles.join(",") + ") not permitted to " + action + " while letter status is " + letter.letterStatus + "'}";
+      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"ERROR","action":action,"caller":caller.mspid,"newStatus":letter.letterStatus}));
       stub.setEvent("letterAction",resultAsBytes);  
       throw new Error(errorText);
     };

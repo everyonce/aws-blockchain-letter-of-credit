@@ -10,7 +10,6 @@ import NoteAdd from '@material-ui/icons/NoteAdd';
 import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
 import Announcement from '@material-ui/icons/Announcement';
 import Paper from '@material-ui/core/Paper';
-import util from 'util';
 import SingleLetter from './SingleLetter';
 import CreateLetterPanel from './CreateLetterPanel';
 import WelcomeLetterPanel from './WelcomeLetterPanel';
@@ -57,10 +56,7 @@ const useStyles = makeStyles(theme => ({
 export default function TabBar(props) {
   const classes = useStyles();
   const [selectedTab, setSelectedTab] = React.useState(0);
-
   var letters = (!props.letters || !Array.isArray(props.letters)) ? []: props.letters;
-  console.log("letters: " + util.inspect(letters))
-
   function handleChange(event, newValue) {
     setSelectedTab(newValue);
   }
@@ -77,14 +73,14 @@ export default function TabBar(props) {
         </Tabs>
       </AppBar>
       <TabPanel value={selectedTab} index={0} key='welcome-letter-tab-panel' >
-            <WelcomeLetterPanel config={props.config} />
-        </TabPanel>
-
-      {letters.map((l, index) =>
+          <WelcomeLetterPanel config={props.config} />
+      </TabPanel>
+      {letters.map((l, index) => 
            <TabPanel value={selectedTab} index={index+1} key={'tabpanel-'+l.letterId}>
-             <SingleLetter key={'singleletter-'+l.letterId} config={props.config} letterId={l.letterId} />
+             <SingleLetter key={'singleletter-'+l.letterId} config={props.config} letterId={l.letterId} 
+              />
             </TabPanel>
-         )}
+      )}
         <TabPanel value={selectedTab} index={letters.length+1} key='create-letter-tab-panel' >
             <CreateLetterPanel config={props.config} />
         </TabPanel>

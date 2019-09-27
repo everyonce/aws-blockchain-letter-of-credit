@@ -3,10 +3,7 @@ import {Field, FieldArray } from 'formik';
 import {Tooltip} from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 
-
 export default function AddProducts(props) {
-  //var values=props.values;
-
   return (
 <div>     
 <FieldArray
@@ -15,7 +12,6 @@ export default function AddProducts(props) {
         <React.Fragment>
         {props.values.product.map((product, index) => (          
         <div key={index} >
-    
             <Field
                 name={`product.${index}`} 
                 render={({ field /* _form */ }) => (
@@ -31,7 +27,6 @@ export default function AddProducts(props) {
                     helperText={(props.errors[`product.${index}.quantity`] && props.touched[`product.${index}.quantity`]) && props.errors[`product.${index}.quantity`]}
                     margin="normal"
                   />
-
                   <TextField
                     {...field}
                     label={`Product Quantity`}
@@ -69,4 +64,4 @@ export default function AddProducts(props) {
     </React.Fragment>
 )} />
 </div>
-  )}
+)}

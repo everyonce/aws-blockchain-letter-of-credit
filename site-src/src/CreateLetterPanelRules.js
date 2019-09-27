@@ -4,10 +4,7 @@ import { Field, FieldArray } from 'formik';
 import {Tooltip} from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 
-
 export default function AddRules(props) {
-  //var values=props.values;
-
   return (
 <div>     
 <FieldArray

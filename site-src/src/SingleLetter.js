@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import OI from 'react-object-inspector';
@@ -7,22 +6,36 @@ import './LetterDetailBlock.css';
 import StatusChain from './StatusChain';
 import getStatusTypes from './LetterStatusTypes';
 import ShowActor from './ShowActor';
+import axios from 'axios';
+
+const fetchLetter = async (letterId, apiUrl) => {
+  const response = await axios.get(apiUrl + '/letter/' + letterId);
+  return response.data;
+};
 
 export default function SingleLetter(props) {
     const statusList = getStatusTypes();
     const [letter, setLetter] = React.useState();
-    React.useEffect( () => {
-        const fetchLetter = async () => {
-            console.log("fetching letter details for props.letterId: " + props.letterId);
-            const response = await axios.get(props.config.apiUrl + '/letter/' + props.letterId);
-            setLetter(response.data);
-            console.log("got letter details for props.letterId: " + props.letterId + ": " + response.data);
-          };
-    
-        fetchLetter() }, [props] );
-    
-    console.log("rendering singleLetter: "+(letter|| {letterId:"noletter"}).letterId +" propId: " + props.letterId);
-    if (!letter ) return ("Loading");
+    const [ready,  setReady]  = React.useState(false);
+
+    React.useEffect(() => {
+      console.log("running useEffect for letterId:"+props.letterId);
+      if(!letter) {
+        fetchLetter(props.letterId,props.config.apiUrl).then(result=>setLetter(result));
+      }
+    }, []);
+
+
+    if (!letter )  {
+      return (
+        <h1>Loading</h1>
+      );
+    }
+
+    props.config.addUpdateHook(
+      props.letterId, 
+      () => fetchLetter(props.letterId, props.config.apiUrl).then(result=>setLetter(result))
+    );
 
     return (
 <Grid
@@ -32,14 +45,18 @@ export default function SingleLetter(props) {
   justify="center"
   direction="column"
 >
+  <Grid  container item alignItems="center" justify="center" direction="column">
+    <Grid item>
+  <StatusChain statusList={statusList} letter={letter} letterId={props.letterId} />
+  </Grid>
   <Grid item>
-  <StatusChain statusList={statusList} letter={letter} letterId={props.letterId} /><br />
     <Typography  variant="h4" component="h4" gutterBottom style={{textAlign:"center"}}>
         Next Step:<br/>
         </Typography>
         <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"center"}}>
         {statusList[statusList.findIndex(x=>x.status===letter.letterStatus)].desc}
     </Typography>
+    </Grid>
   </Grid>   
   <Grid
     item
@@ -70,5 +87,6 @@ export default function SingleLetter(props) {
 </Typography>
     </Grid>
 </Grid>
+  
   )
   }

@@ -35,7 +35,7 @@ export default function CreateWelcomePage(props) {
      };
      let createAll=(values) => {
       setCreating(true);
-      let newLetters = SampleLetters(NetworkConstants.MemberId);
+      let newLetters = SampleLetters(networkConstants.MemberId);
       newLetters.forEach(newLetter => {
         axios.post(props.config.apiUrl + '/createLetter', newLetter
         ).then((resp) => {

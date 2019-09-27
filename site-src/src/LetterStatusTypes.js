@@ -49,7 +49,7 @@ export default function getStatusTypes()
     status: "PACKET_BUYER_READY",
     desc: "Waiting on Buying Bank to APPROVE packet",
     whoCan: [
-        {"BuyerBank": "APPROVE"}
+        {"BuyerBank": ["APPROVE"]}
     ]
 },
 {

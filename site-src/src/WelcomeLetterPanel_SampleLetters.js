@@ -1,6 +1,7 @@
 const uuidv4 = require('uuid/v4');
 
 export default function SampleLetters(memberId) { 
+  console.log("Defining demo letter structures for memberId:" + memberId);
     return (
 [
 {

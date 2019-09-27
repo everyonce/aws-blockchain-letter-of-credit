@@ -16,6 +16,8 @@
     "clsx": "latest",
     "dateformat": "^3.0.3",
     "formik": "^1.5.8",
+    "guid": "0.0.12",
+    "moment": "^2.24.0",
     "prettier": "^1.18.2",
     "react": "latest",
     "react-dom": "latest",
@@ -23,6 +25,7 @@
     "react-scripts": "latest",
     "react-websocket": "^2.0.1",
     "recharts": "^1.7.1",
+    "uuid": "^3.3.3",
     "yup": "latest"
   },
   "browserslist": {
