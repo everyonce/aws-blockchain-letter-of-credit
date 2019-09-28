@@ -1,24 +1,11 @@
 import React from 'react';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
-import util from 'util';
 import NetworkConstants from './NetworkConstants';
 import SampleLetters from './WelcomeLetterPanel_SampleLetters';
-
-const useStyles = makeStyles(theme => ({
-    root: {
-      flexGrow: 1,
-      backgroundColor: theme.palette.background.paper,
-    },
-    paper: {
-        padding: theme.spacing(3, 2),
-    }
-  }));
-
 
 export default function CreateWelcomePage(props) {
     const networkConstants = NetworkConstants();

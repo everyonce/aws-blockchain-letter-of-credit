@@ -10,6 +10,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import AddProducts from './CreateLetterPanelProducts';
 import AddRules from './CreateLetterPanelRules';
 import uuidv1 from 'uuid/v1';
+import util from 'util';
+import NetworkConstants from './NetworkConstants';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -22,8 +24,10 @@ const useStyles = makeStyles(theme => ({
   }));
   
 export default function CreateLetterApp(props) {
+  const networkConstants = NetworkConstants();
+
     const classes = useStyles();
-    const [busy, setBusy] = React.useState(false);
+    
     let products = [];
     let rules = [];
     return (
@@ -31,8 +35,11 @@ export default function CreateLetterApp(props) {
         <Formik
         initialValues={{ product: products, rule: rules, description: '', name: '', comment: '' }}
         onSubmit={(values, {setSubmitting}) => {
-          setBusy(true);
+          setSubmitting(true);
           values.letterId = uuidv1();
+          values.productDetails = values.product;
+          values.roleIdentities=demoRoles(networkConstants.MemberId);
+          console.log("values ready to push: " + util.inspect(values));
           console.log("posting to "+props.config.apiUrl + '/createLetter');
           axios.post(props.config.apiUrl + '/createLetter',
             values,
@@ -43,7 +50,7 @@ export default function CreateLetterApp(props) {
               }
             },
           ).then((resp) => {
-            setBusy(false);
+            setSubmitting(false);
           }
           );
         }}
@@ -55,7 +62,7 @@ export default function CreateLetterApp(props) {
             .required('Required'),
         })}
 
-        render={({handleSubmit, handleChange, handleBlur, values, errors, touched, dirty, busy }) => {
+        render={({handleSubmit, handleChange, handleBlur, values, errors, touched, dirty, isSubmitting }) => {
           return (
             <form onSubmit={handleSubmit}>
                 <div>
@@ -104,11 +111,11 @@ export default function CreateLetterApp(props) {
                   type="button"
                   className="outline"
                   // onClick={handleReset}
-                  disabled={!dirty || busy}
+                  disabled={!dirty || isSubmitting}
                 >
                   Reset
                 </Button>
-                <Button type="submit" disabled={busy}>
+                <Button type="submit" disabled={isSubmitting}>
                   Submit
                 </Button>
                 {/* <DisplayFormikState {...props} /> */}
@@ -120,3 +127,23 @@ export default function CreateLetterApp(props) {
             </Container>
         )
     };
+
+    function demoRoles(memberId) {
+      return    [
+        { "role": "SELLER",
+          "mspid": memberId,
+          "org": "DemoOrg" },
+        { "role": "SELLERBANK",
+          "mspid": memberId,
+          "org": "DemoOrg"},
+        { "role": "BUYER",
+          "mspid": memberId,
+          "org": "DemoOrg"},
+        { "role": "BUYERBANK",
+          "mspid": memberId,
+          "org": "DemoOrg"},
+        { "role": "THIRDPARTY",
+          "mspid": memberId,
+          "org": "DemoOrg" }
+      ];
+    }

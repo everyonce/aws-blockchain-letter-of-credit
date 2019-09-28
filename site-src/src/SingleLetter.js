@@ -16,14 +16,12 @@ const fetchLetter = async (letterId, apiUrl) => {
 export default function SingleLetter(props) {
     const statusList = getStatusTypes();
     const [letter, setLetter] = React.useState();
-    const [ready,  setReady]  = React.useState(false);
-
+    
     React.useEffect(() => {
-      console.log("running useEffect for letterId:"+props.letterId);
       if(!letter) {
         fetchLetter(props.letterId,props.config.apiUrl).then(result=>setLetter(result));
       }
-    }, []);
+    }, [props.letterId,props.config.apiUrl,letter]);
 
 
     if (!letter )  {

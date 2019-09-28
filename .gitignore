@@ -13,9 +13,15 @@
 
 build/
 vendor/
+node_modules/
 sdk_config*
 keystore/*
 docker-compose.override.yml
 fabric_config.yaml
 configtx.yaml
 peer.env
+go.mod
+go.sum
+.DS_Store
+
+

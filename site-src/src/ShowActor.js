@@ -1,7 +1,6 @@
 import React from 'react';
 import {BankIcon, PersonIcon} from './Icons';
 import getStatusTypes from './LetterStatusTypes';
-import util from 'util';
 import axios from 'axios';
 import { Typography, Button } from '@material-ui/core';
 
@@ -56,7 +55,7 @@ function ShowActor(props) {
             <ActorIcon sel={sel} {...props} /><br />
             <Typography>{props.actor}</Typography><br />
             {actorActions.map(x=>
-                <React.Fragment>
+                <React.Fragment key={letter.letterId+"-"+props.actor+"-"+x}>
                     <Button disabled={working} value={x} onClick={doAction} style={(!working)?bs:[]}>{x}</Button><br />
                 </React.Fragment>
             )}
