@@ -33,6 +33,7 @@ export default function CreateLetterApp(props) {
         onSubmit={(values, {setSubmitting}) => {
           setBusy(true);
           values.letterId = uuidv1();
+          console.log("posting to "+props.config.apiUrl + '/createLetter');
           axios.post(props.config.apiUrl + '/createLetter',
             values,
             {

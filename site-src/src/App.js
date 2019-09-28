@@ -23,7 +23,8 @@ export default class App extends Component {
     this.letterUpdateHooks.push({letterId: letterId, updateFunc: updateFunc});
   }
 
-  config = {apiUrl:(process.env.REACT_APP_API_URL)?process.env.REACT_APP_API_URL:window.location,
+
+  config = {apiUrl:(process.env.REACT_APP_API_URL)?process.env.REACT_APP_API_URL:window.location.origin,
             wsUrl :(process.env.REACT_APP_WS_URL)?process.env.REACT_APP_WS_URL:
                     'ws://'+window.location.hostname+(window.location.port ? ':'+window.location.port: '')+'/ws',
             addUpdateHook: this.addUpdateHook
