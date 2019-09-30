@@ -137,6 +137,9 @@ async deleteAllLetters(stub) {
       }
       if (res.done) {
         console.log('end of data - closing iterator');
+        var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));
+        stub.setEvent("letterAction",resultAsBytes);  
+
         await iterator.close();
         return;
       }
@@ -181,28 +184,20 @@ async listLetters(stub, args) {
 }
 async action(stub, args) {
   try {
-    //var force=false;
-    console.log("Incoming full: " + util.inspect(args));
-    console.log("Incoming arg0: " + util.inspect(args[0]));
-    console.log("Incoming json: " + util.inspect(JSON.parse(args[0])));
     let incoming = JSON.parse(args[0]);
     let key = 'LETTER.' + incoming["letterId"];
     let action = incoming["action"];
     let letterAsBytes = await stub.getState(key);
-
-    console.log("got letter: " + letterAsBytes.toString());
-    console.log("using key: " + key);
-if (!letterAsBytes || letterAsBytes.length==0) {
-
-  throw new Error("couldn't find "+key);
-}
+    if (!letterAsBytes || letterAsBytes.length==0) {
+      throw new Error("couldn't find "+key);
+    }
     let letter = JSON.parse(letterAsBytes.toString());
     var caller = stub.getCreator();
     let callerRoles = letter.roleIdentities.filter(role => role.mspid==caller.mspid).map(y => y.role).reduce((a, b) => a.concat(b), []);
     console.log(">>> ACTION: "+ "Caller: " + caller.mspid + ", Action: " + action + ", Status: " + letter.letterStatus + ", MSP-roles:"+callerRoles.join(","));
     let badAction = function(){
-      var errorText="{'error':'Caller: " + caller.mspid + " not permitted to " + action + " while letter status is " + letter.letterStatus + "'}";
-      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"SUCCESS","action":action,"caller":caller.mspid,"newStatus":letter.letterStatus}));
+      var errorText="{'error':'Caller: " + caller.mspid + "(ROLES: " + callerRoles.join(",") + ") not permitted to " + action + " while letter status is " + letter.letterStatus + "'}";
+      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"ERROR","action":action,"caller":caller.mspid,"newStatus":letter.letterStatus}));
       stub.setEvent("letterAction",resultAsBytes);  
       throw new Error(errorText);
     };
@@ -213,7 +208,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["SELLERBANK"];
         if (action=="CONFIRM" && callerRoles.includes("SELLERBANK")) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="TERMS_SELLER_APPROVAL";
         } else {
@@ -228,7 +223,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
           console.log("Running APPROVE on letter " + letter.letterId + " as actor: " + actor);
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           console.log("approval records: " + util.inspect(letter.approvalRecord));
           console.log("actor Roles: " + util.inspect(actorRoles));
@@ -256,7 +251,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["SELLER"];
         if (action=="CONFIRM" && callerRoles.some(x=> actorRoles.includes(x))) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="SHIPPED";
         } else {
@@ -269,7 +264,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
           //CHECK FOR EXISTENCE OF REQUIRED AUTOMATIC RULES
           //CHECK FOR SIGNOFF ON MANUAL RULES
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="PACKET_SELLER_READY";
         } else if (action=="ADD_DOCUMENT" && callerRoles.some(x=> actorRoles.includes(x))) {
@@ -282,7 +277,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["SELLERBANK"];
         if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="PACKET_BUYER_READY";
         } else {
@@ -293,7 +288,7 @@ if (!letterAsBytes || letterAsBytes.length==0) {
         actorRoles=["BUYERBANK"];
         if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
           callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action});
+            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
           });
           letter.letterStatus="CLOSED";
         } else {
