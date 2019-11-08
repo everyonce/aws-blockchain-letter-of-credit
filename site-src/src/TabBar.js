@@ -56,7 +56,7 @@ const useStyles = makeStyles(theme => ({
 export default function TabBar(props) {
   const classes = useStyles();
   const [selectedTab, setSelectedTab] = React.useState(0);
-  var letters = (!props.letters || !Array.isArray(props.letters)) ? []: props.letters;
+  var items = (!props.items || !Array.isArray(props.items)) ? []: props.items;
   function handleChange(event, newValue) {
     setSelectedTab(newValue);
   }
@@ -66,22 +66,22 @@ export default function TabBar(props) {
       <AppBar className={classes.appbar} position="static" >
         <Tabs centered forceRenderTabPanel={true} value={selectedTab} onChange={handleChange} aria-label="simple tabs example">
         <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} icon={<Announcement />} />
-        {letters.map((l, index) =>
+        {items.map((l, index) =>
                 <Tab label={l.letterDescription} {...a11yProps(index+1)} key={"tabtop"+l.letterId} icon={<InsertDriveFile />} />
             )}
-            <Tab label='Create' {...a11yProps(letters.length+1)} key={"tabtop-create"} icon={<NoteAdd />} />
+            <Tab label='Create' {...a11yProps(items.length+1)} key={"tabtop-create"} icon={<NoteAdd />} />
         </Tabs>
       </AppBar>
       <TabPanel value={selectedTab} index={0} key='welcome-letter-tab-panel' >
           <WelcomeLetterPanel config={props.config} />
       </TabPanel>
-      {letters.map((l, index) => 
+      {items.map((l, index) => 
            <TabPanel value={selectedTab} index={index+1} key={'tabpanel-'+l.letterId}>
              <SingleLetter key={'singleletter-'+l.letterId} config={props.config} letterId={l.letterId} 
               />
             </TabPanel>
       )}
-        <TabPanel value={selectedTab} index={letters.length+1} key='create-letter-tab-panel' >
+        <TabPanel value={selectedTab} index={items.length+1} key='create-letter-tab-panel' >
             <CreateLetterPanel config={props.config} />
         </TabPanel>
     </Paper>

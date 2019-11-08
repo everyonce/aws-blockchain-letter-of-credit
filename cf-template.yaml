@@ -292,7 +292,7 @@ Resources:
               git clone https://github.com/everyonce/aws-blockchain-letter-of-credit
               aws s3 cp s3://us-east-1.managedblockchain/etc/managedblockchain-tls-chain.pem  /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem
               cd /opt/aws-blockchain-letter-of-credit
-              git checkout version1.1
+              git checkout purchase-order-mod-1.0
 
               #export env variables, some filled in by cloudformation
               export CHANNEL=awschannel

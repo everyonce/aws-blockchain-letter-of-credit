@@ -1,12 +1,24 @@
 import React from 'react';
-import {BankIcon, PersonIcon} from './Icons';
+import {BankIcon, PersonIcon, WarehouseIcon, FactoryIcon, TruckIcon} from './Icons';
 import getStatusTypes from './LetterStatusTypes';
 import axios from 'axios';
 import { Typography, Button } from '@material-ui/core';
 
 function ActorIcon(props) {
-    if (props.icon==="bank") 
-        return (<BankIcon sel={props.sel} height={'80px'} width={'80px'} />);
+    switch(props.icon) {
+        case "bank":
+          return (<BankIcon sel={props.sel} height={'80px'} width={'80px'} />);
+        case "person":
+          return (<PersonIcon sel={props.sel} height={'80px'} width={'80px'} />);
+        case "warehouse":
+          return (<WarehouseIcon sel={props.sel} height={'80px'} width={'80px'} />);
+        case "factory":
+          return (<FactoryIcon sel={props.sel} height={'80px'} width={'80px'} />);
+        case "truck":
+          return (<TruckIcon sel={props.sel} height={'80px'} width={'80px'} />);
+        default:
+          // code block
+      }
     return (<PersonIcon sel={props.sel} height={'80px'} width={'80px'} />);
 }
 

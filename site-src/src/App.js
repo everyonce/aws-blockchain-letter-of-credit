@@ -11,16 +11,16 @@ export default class App extends Component {
     super(props);
     this.state = {
       title:"Blockchain Dashboard",
-      isLoading: false, letters: [], error: null 
+      isLoading: false, items: [], error: null 
     };
     this.props=props;
   }
   
-  letterUpdateHooks= []
+  updateHooks= []
 
   addUpdateHook = (letterId, updateFunc) => { 
-    this.letterUpdateHooks = this.letterUpdateHooks.filter(x => x.letterId !== letterId)
-    this.letterUpdateHooks.push({letterId: letterId, updateFunc: updateFunc});
+    this.updateHooks = this.updateHooks.filter(x => x.letterId !== letterId)
+    this.updateHooks.push({letterId: letterId, updateFunc: updateFunc});
   }
 
 
@@ -37,17 +37,17 @@ export default class App extends Component {
       switch (jEvent["ccEvent"]["action"]) {
         case "CREATE":
           if (!this.state.isLoading) {
-            this.updateLetters();
+            this.updateItems();
           }
           break;
         case "DELETE":
-            this.updateLetters();
+            this.updateItems();
             break;
         case "CONFIRM":
-            this.letterUpdateHooks.find(x => x.letterId===jEvent["ccEvent"]["letterId"]).updateFunc();
+            this.updateHooks.find(x => x.letterId===jEvent["ccEvent"]["letterId"]).updateFunc();
             break;
         case "APPROVE":
-            this.letterUpdateHooks.find(x => x.letterId===jEvent["ccEvent"]["letterId"]).updateFunc();
+            this.updateHooks.find(x => x.letterId===jEvent["ccEvent"]["letterId"]).updateFunc();
             break;
         default:
           console.log("Got some other event");
@@ -55,19 +55,19 @@ export default class App extends Component {
     }
   }
 
-  updateLetters = () => {
-    this.setState({ isLoading: true, letters: [], error: null });
+  updateItems = () => {
+    this.setState({ isLoading: true, items: [], error: null });
     axios.get(this.config.apiUrl + '/listLetters')
       .then(result => 
         this.setState({
-          letters: result.data,
+          items: result.data,
           isLoading: false })
         ) 
       .catch(error => this.setState({ error: error, isLoading: false })); 
   }
 
   componentDidMount = () => {
-    this.updateLetters();
+    this.updateItems();
   }
 
   render() {
@@ -76,7 +76,7 @@ export default class App extends Component {
     return (
       <React.Fragment>      
         <Websocket url={this.config.wsUrl} onMessage={(event) => this.wsEvent(event)} />
-        <TabBar letters={this.state.letters} config={this.config} />
+        <TabBar items={this.state.items} config={this.config} />
       </React.Fragment>
     );
   }

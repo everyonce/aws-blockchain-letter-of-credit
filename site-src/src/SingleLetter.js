@@ -15,16 +15,16 @@ const fetchLetter = async (letterId, apiUrl) => {
 
 export default function SingleLetter(props) {
     const statusList = getStatusTypes();
-    const [letter, setLetter] = React.useState();
+    const [item, setItem] = React.useState();
     
     React.useEffect(() => {
-      if(!letter) {
-        fetchLetter(props.letterId,props.config.apiUrl).then(result=>setLetter(result));
+      if(!item) {
+        fetchLetter(props.letterId,props.config.apiUrl).then(result=>setItem(result));
       }
-    }, [props.letterId,props.config.apiUrl,letter]);
+    }, [props.letterId,props.config.apiUrl,item]);
 
 
-    if (!letter )  {
+    if (!item )  {
       return (
         <h1>Loading</h1>
       );
@@ -32,7 +32,7 @@ export default function SingleLetter(props) {
 
     props.config.addUpdateHook(
       props.letterId, 
-      () => fetchLetter(props.letterId, props.config.apiUrl).then(result=>setLetter(result))
+      () => fetchLetter(props.letterId, props.config.apiUrl).then(result=>setItem(result))
     );
 
     return (
@@ -45,14 +45,14 @@ export default function SingleLetter(props) {
 >
   <Grid  container item alignItems="center" justify="center" direction="column">
     <Grid item>
-  <StatusChain statusList={statusList} letter={letter} letterId={props.letterId} />
+  <StatusChain statusList={statusList} letter={item} letterId={props.letterId} />
   </Grid>
   <Grid item>
     <Typography  variant="h4" component="h4" gutterBottom style={{textAlign:"center"}}>
         Next Step:<br/>
         </Typography>
         <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"center"}}>
-        {statusList[statusList.findIndex(x=>x.status===letter.letterStatus)].desc}
+        {statusList[statusList.findIndex(x=>x.status===item.letterStatus)].desc}
     </Typography>
     </Grid>
   </Grid>   
@@ -64,20 +64,20 @@ export default function SingleLetter(props) {
     alignItems="flex-start"
     justify="center"
     >
-    {[      {actor:"Buyer", icon:"person"},
-            {actor:"BuyerBank", icon:"bank"},
-            {actor:"SellerBank", icon:"bank"},
-            {actor:"Seller", icon:"person"},
+    {[      {actor:"Manufacturer", icon:"factory"},
+            {actor:"Logistics", icon:"truck"},
+            {actor:"Warehouse", icon:"warehouse"},
+            {actor:"RepairShop", icon:"person"},
         ].map(x => 
             <Grid item xs={6} sm={3} justify="center">
-                <ShowActor config={props.config} actor={x.actor} icon={x.icon} letter={letter} />
+                <ShowActor config={props.config} actor={x.actor} icon={x.icon} letter={item} />
             </Grid> )}
     </Grid>
     <Grid item>
     <Typography gutterBottom>
         {props.letterId} <br />
-          Status: {letter.letterStatus} <br />
-          {(letter.productDetails)?letter.productDetails.map((x) => 
+          Status: {item.letterStatus} <br />
+          {(item.productDetails)?item.productDetails.map((x) => 
                   <OI key={"product"+x.productSku} data={x} name={x.productSku}/>
                   ):'Cannot load, retry'
                   }
