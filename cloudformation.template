@@ -1,0 +1,409 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Basic Initial Member template"
+Parameters:
+  MemberName:
+    Default: "Org1"
+    Type: String
+  MemberDescription:
+    Default: "Org Description"
+    Type: String
+  MemberAdminUsername:
+    Default: "admin"
+    Type: String
+  MemberAdminPassword:
+    Default: "Adm1npwd"
+    Type: String
+  Edition:
+    Default: "STARTER"
+    AllowedValues:
+        - "STARTER"
+        - "STANDARD"
+    Type: String
+  ThresholdPercentage:
+    Default: "50"
+    Type: Number
+  ThresholdComparator:
+    Default: "GREATER_THAN"
+    AllowedValues:
+        - "GREATER_THAN"
+        - "GREATER_THAN_OR_EQUAL_TO"
+    Type: String
+  ProposalDurationInHours:
+    Type: Number
+    Default: "24"
+  PeerNodeInstanceType:
+    Default: "bc.t3.medium"
+    AllowedValues:
+        - "bc.t3.small"
+        - "bc.t3.medium"
+        - "bc.t3.large"
+        - "bc.t3.xlarge"
+        - "bc.m5.large"
+        - "bc.m5.xlarge"
+        - "bc.m5.2xlarge"
+        - "bc.m5.4xlarge"
+        - "bc.c5.large"
+        - "bc.c5.xlarge"
+        - "bc.c5.2xlarge"
+        - "bc.c5.4xlarge"
+    Type: String
+  AvailabilityZone:
+    Type: String
+    Default: "us-east-1a"
+    AllowedValues:
+      - "us-east-1a"
+      - "us-east-1b"
+      - "us-east-1c"
+      - "us-east-1d"
+      - "us-east-1e"
+      - "us-east-1f"
+  LatestAmiId :
+    Type : String
+    Default: "ami-0b898040803850657"
+  KeyName:
+    Type:  AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 key pair to enable SSH access to the EC2 instance
+  Ec2InstanceType:
+    Description: Instance type for the API/Web server
+    Default: "t3.medium"
+    AllowedValues:
+        - "t3.small"
+        - "t3.medium"
+        - "t3.large"
+        - "t3.xlarge"
+        - "m5.large"
+        - "m5.xlarge"
+        - "m5.2xlarge"
+        - "m5.4xlarge"
+        - "c5.large"
+        - "c5.xlarge"
+        - "c5.2xlarge"
+        - "c5.4xlarge"
+    Type: String
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.200.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.200.0.0/20
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName} Public Subnet (AZ)
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName} Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http, ssh to client host
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
+  Member:
+    Type: "AWS::ManagedBlockchain::Member"
+    Properties:
+      NetworkConfiguration:
+        Name: !Ref AWS::StackName
+        Framework: "HYPERLEDGER_FABRIC"
+        FrameworkVersion: "1.2"
+        NetworkFrameworkConfiguration:
+          NetworkFabricConfiguration:
+            Edition: !Ref Edition
+        VotingPolicy:
+          ApprovalThresholdPolicy:
+            ThresholdPercentage: !Ref ThresholdPercentage
+            ProposalDurationInHours: !Ref ProposalDurationInHours
+            ThresholdComparator: !Ref ThresholdComparator
+      MemberConfiguration:
+        Name: !Ref MemberName
+        MemberFrameworkConfiguration:
+          MemberFabricConfiguration:
+            AdminUsername: !Ref MemberAdminUsername
+            AdminPassword: !Ref MemberAdminPassword
+            
+  InitialNode:
+    DependsOn: Member
+    Type: "AWS::ManagedBlockchain::Node"
+    Properties:
+      NetworkId: !GetAtt Member.NetworkId
+      MemberId: !GetAtt Member.MemberId
+      NodeConfiguration:
+        InstanceType: !Ref PeerNodeInstanceType
+        AvailabilityZone: !Select [ 0, !GetAZs '' ]
+
+  BlockchainVPCEndpoint:
+    DependsOn: Member
+    Type:                                         AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId:                                    !Ref VPC
+      PrivateDnsEnabled:                        True
+      ServiceName:                              !GetAtt NetworkInfo.NetworkEndpoint
+      VpcEndpointType:                          Interface
+      SubnetIds:                                
+      - !Ref PublicSubnet
+      SecurityGroupIds:
+      - !Ref InstanceSecurityGroup    
+      - !GetAtt VPC.DefaultSecurityGroup
+
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  MakeLowercaseFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+        Code:
+          ZipFile: |
+            import json
+            import cfnresponse
+            def handler(event, context):
+              responseData = {}
+              responseData['NetworkEndpoint']='com.amazonaws.us-east-1.managedblockchain.' + event['ResourceProperties']['Input'].lower()
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, "CustomResourcePhysicalID")
+        Handler: "index.handler"
+        Runtime: python3.7
+        Timeout: 30
+        Role: !GetAtt LambdaExecutionRole.Arn
+
+  NetworkInfo:
+    Type: Custom::NetworkInfo
+    Properties:
+        ServiceToken: !GetAtt MakeLowercaseFunction.Arn
+        Input: !GetAtt Member.NetworkId
+
+  IAMRoleForEC2:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - ec2.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonManagedBlockchainFullAccess
+      - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+
+  IAMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref IAMRoleForEC2
+
+  Instance :
+    DependsOn:
+      - InitialNode
+      - BlockchainVPCEndpoint
+    Type : 'AWS::EC2::Instance'
+    Properties :
+      IamInstanceProfile: !Ref IAMInstanceProfile
+      KeyName: !Ref KeyName
+      ImageId : !Ref LatestAmiId
+      InstanceType: !Ref Ec2InstanceType
+      SecurityGroupIds:
+      - !Ref InstanceSecurityGroup   
+      - !GetAtt VPC.DefaultSecurityGroup
+      SubnetId: !Ref PublicSubnet   
+      UserData:
+        Fn::Base64:
+          Fn::Sub:
+            - |
+              #!bin/bash -xe
+              # do initial software updates and installations
+              yum update -y
+              yum install docker git python-pip -y
+              systemctl start docker
+              docker pull hyperledger/fabric-ca
+              docker pull hyperledger/fabric-tools:1.2.0
+              docker pull golang:1.12.6-stretch
+              docker pull alpine:latest
+              pip install --upgrade awscli
+
+              #clone this repo
+              cd /opt
+              git clone https://github.com/everyonce/aws-blockchain-letter-of-credit
+              aws s3 cp s3://us-east-1.managedblockchain/etc/managedblockchain-tls-chain.pem  /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem
+              cd /opt/aws-blockchain-letter-of-credit
+              git checkout purchase-order-mod-1.0
+
+              #export env variables, some filled in by cloudformation
+              export CHANNEL=awschannel
+              export REGION=${REGION}
+              export NETWORKID=${NETWORKID}
+              export MEMBERID=${MEMBERID}
+              export ORDERERURL=$(aws managedblockchain get-network --region $REGION --network-id $NETWORKID --query 'Network.FrameworkAttributes.Fabric.OrderingServiceEndpoint' --output text)
+              export ORDERER=$(echo $ORDERERURL | cut -d':' -f 1)
+              export CA=$(aws managedblockchain get-member --region $REGION --network-id $NETWORKID --member-id $MEMBERID --query 'Member.FrameworkAttributes.Fabric.CaEndpoint' --output text)
+              export NODEID=$(aws managedblockchain list-nodes --region $REGION --network-id $NETWORKID --member-id $MEMBERID --query 'Nodes[0].Id' --output text)
+              export NODEURL=$(aws managedblockchain get-node --region $REGION --network-id $NETWORKID --member-id $MEMBERID --node-id $NODEID --query 'Node.FrameworkAttributes.Fabric.PeerEndpoint' --output text)
+              export NODENAME=$(echo $NODEURL | cut -d':' -f 1)
+              export NODEEVENTURL=$(aws managedblockchain get-node --region $REGION --network-id $NETWORKID --member-id $MEMBERID --node-id $NODEID --query 'Node.FrameworkAttributes.Fabric.PeerEventEndpoint' --output text)
+
+              #enroll and copy certs and keys
+              docker run -v /opt:/opt hyperledger/fabric-ca fabric-ca-client enroll -u https://admin:Adm1npwd@$CA --tls.certfiles /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem -M /opt/aws-blockchain-letter-of-credit/msp
+              cp -r /opt/aws-blockchain-letter-of-credit/msp/signcerts /opt/aws-blockchain-letter-of-credit/msp/admincerts
+              cp -r /opt/aws-blockchain-letter-of-credit/msp/keystore/* /opt/aws-blockchain-letter-of-credit/keystore
+
+              #copy configs from templates
+              cp config/fabric_config_template.yaml config/fabric_config.yaml
+              cp config/peer-template.env           config/peer.env
+              cp config/configtx_template.yaml      config/configtx.yaml
+              
+              #replacements in fabric config for api 
+              sed -i -e "s/###ORDERERURL###/$ORDERERURL/g" config/fabric_config.yaml
+              sed -i -e "s/###ORDERER###/$ORDERER/g" config/fabric_config.yaml
+              sed -i -e "s/###MEMBERID###/$MEMBERID/g" config/fabric_config.yaml
+              sed -i -e "s/###NETWORKID###/$NETWORKID/g" config/fabric_config.yaml
+              sed -i -e "s/###NODEURL###/$NODEURL/g" config/fabric_config.yaml
+              sed -i -e "s/###NODENAME###/$NODENAME/g" config/fabric_config.yaml
+              sed -i -e "s/###NODEEVENTURL###/$NODEEVENTURL/g" config/fabric_config.yaml
+              sed -i -e "s/###CHANNEL###/$CHANNEL/g" config/fabric_config.yaml
+
+              #the next 6 lines put the actual certificates in-line into the fabric config
+              while read LINE ; do echo "        $LINE" ; done < managedblockchain-tls-chain.pem > ./tmp_amb.pem
+              while read LINE ; do echo "            $LINE" ; done < msp/admincerts/cert.pem > ./tmp_admin.pem
+              sed -i -e '/###AMBCERTPEM###/r./tmp_amb.pem' config/fabric_config.yaml
+              sed -i -e '/###ADMINCERTPEM###/r./tmp_admin.pem' config/fabric_config.yaml
+              sed -i '/AMBCERTPEM/d' config/fabric_config.yaml
+              sed -i '/ADMINCERTPEM/d' config/fabric_config.yaml
+
+              #replacements in channel config
+              sed -i -e "s/###MEMBERID###/$MEMBERID/g" config/configtx.yaml
+
+              #replacements in peer env file
+              sed -i -e "s/###NODEURL###/$NODEURL/g" config/peer.env
+              sed -i -e "s/###MEMBERID###/$MEMBERID/g" config/peer.env
+
+              # create binary channel config
+              docker run -v /opt:/opt hyperledger/fabric-tools:1.2.0 configtxgen -outputCreateChannelTx /opt/aws-blockchain-letter-of-credit/config/$CHANNEL.pb -profile OneOrgChannel -channelID $CHANNEL --configPath /opt/aws-blockchain-letter-of-credit/config
+              # create channel on orderer, get back init block - might take multiple attempts.
+              NEXT_WAIT_TIME=0
+              until docker run -v /opt:/opt --env-file config/peer.env hyperledger/fabric-tools:1.2.0 peer channel create -c $CHANNEL -f /opt/aws-blockchain-letter-of-credit/config/$CHANNEL.pb --outputBlock /opt/aws-blockchain-letter-of-credit/config/$CHANNEL.block -o $ORDERERURL --cafile /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem --tls --timeout 900s --connTimeout 900s --logging-level debug \
+                  || [ $NEXT_WAIT_TIME -eq 4 ]; do
+                sleep $(( NEXT_WAIT_TIME++ ))
+                sleep 60
+                echo "WAITING FOR RETRY"
+              done
+              # use init block to join peer to channel
+              docker run -v /opt:/opt --env-file config/peer.env hyperledger/fabric-tools:1.2.0 peer channel join -b /opt/aws-blockchain-letter-of-credit/config/$CHANNEL.block -o $ORDERERURL --cafile /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem --tls
+              # install chaincode to the peer
+              docker run -v /opt:/opt --env-file config/peer.env hyperledger/fabric-tools:1.2.0 peer chaincode install -n letter-of-credit -l node -v 1 -p /opt/aws-blockchain-letter-of-credit/chaincode
+              # instantiate chaincode to the channel
+              docker run -v /opt:/opt --env-file config/peer.env hyperledger/fabric-tools:1.2.0 peer chaincode instantiate -n letter-of-credit -v 1 -C $CHANNEL  -o $ORDERERURL --cafile /opt/aws-blockchain-letter-of-credit/managedblockchain-tls-chain.pem --tls -c '{"Args":["init"]}'
+
+              # build static html site
+              cd site-src
+              #need to build network constants for the react site
+              rm ./src/NetworkConstants.js
+              cat << EOF > ./src/NetworkConstants.js
+              export default function NetworkConstants() { return {
+                "NetworkId":"###NETWORKID###",
+                "MemberId":"###MEMBERID###"
+              }};
+              EOF
+              
+              #replacements in peer env file
+              sed -i -e "s/###NETWORKID###/$NETWORKID/g" ./src/NetworkConstants.js
+              sed -i -e "s/###MEMBERID###/$MEMBERID/g" ./src/NetworkConstants.js
+
+
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+              export NVM_DIR="$HOME/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+              [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+              nvm install 10
+              npm install
+              npm run-script build
+
+              # build api+web container
+              cd ..
+              mv site-src/build ./site
+
+
+              docker build -t aws-amb-loc-demo .
+
+              # run container in background
+              docker run -d --restart=always  -p 80:3000 aws-amb-loc-demo
+
+            - REGION: !Ref "AWS::Region"
+              NETWORKID: !GetAtt Member.NetworkId
+              MEMBERID: !GetAtt Member.MemberId
+
+Outputs:
+  BlockchainMemberID:
+    Description: Blockchain Member Id
+    Value: !GetAtt Member.MemberId
+  BlockchainNetworkID:
+    Description: Blockchain Network Id
+    Value: !GetAtt Member.NetworkId
+  InstanceIpAddress:
+    Description: The Instance Public IP
+    Value: !GetAtt Instance.PublicIp
