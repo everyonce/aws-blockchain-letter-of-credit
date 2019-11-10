@@ -49,106 +49,37 @@ console.log('============= START : Initialize Ledger ===========');
 console.log('============= END : Initialize Ledger ===========');
 }
 
-/**
- * Create LC
- * 
- * 
- * @param {*} letter - the initial letter of credit. This will be JSON, as follows:
- * {
- *   "docType": "letter",
- *   "letterId": "1231-sdfsd-1231-dsfw",  -guid
- *   "letterDescription": "Delias Dainty Delights",
- *   "productDetails": [] - see product structure below
- *   "rules": [], - see rule structure below
- *   "roleIdentities": [], 
- *   "createDate": "2018-09-20T12:41:59.582Z",
- *   "closeReason": ""
- * }
- * 
- * roleIdentities: {
- *   [{"role": "SELLER",  // SELLER, SELLERBANK, BUYER, BUYERBANK, THIRDPARTY
- *     "mspid": "sdfvsdfsdfsdf"
- *     "org": "Company Name"}]
- * ]}
- * 
- * approvalRecord: [
- * {"STAGE": "NEW",
- * "ROLE":"SELLERBANK",
- * "ACTION":"ACKNOWLEDGE"}
- * ]
- * 
- * letterRequirements: [
- *   {"type":"document",
- *    "from":"msp"}
- * ]
- * 
- * productDetails: [
- * {"product": "coal",
- *  "detail1": "afsf",
- *  "detail2":"afafad"},
- * ]
- * 
- */
-async createLetter(stub, args) {
+async create(stub, args) {
   try {
-   // let mylog = [];
-    console.log('============= START : createLetter ===========');
-    let letter = JSON.parse(args[0]);
-    let Key = "LETTER."+letter.letterId;
-    letter.docType= 'letter';
-    letter.letterStatus= 'NEW';
-    letter.approvalRecord=[];
+    let item = JSON.parse(args[0]);
+    let Key = item.docType+'.'+item.id;
+    item.status= 'NEW';
+    item.history=[];
     //verify each entity only has one role
     
-    var eventMessage=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"CREATE","caller":stub.getCreator().mspid,"newStatus":letter.letterStatus}));
-    stub.setEvent("letterAction",eventMessage);
-    await stub.putState(Key, Buffer.from(JSON.stringify(letter)));
-    console.info('============= END : createLetter ===========');
-
+    var eventMessage=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"CREATE","caller":stub.getCreator().mspid,"newStatus":item.status}));
+    stub.setEvent("itemAction",eventMessage);
+    await stub.putState(Key, Buffer.from(JSON.stringify(item)));
   } catch(error) {
     throw new Error(error);
   }
 }
-async getLetter(stub, args) {
+async get(stub, args) {
   console.log('============= START : getletter ===========');
-  let letterId = args[0];
-  let key = 'LETTER.' + letterId;
+  let key = args[0];
+  //let key = 'LETTER.' + letterId;
   
-  let letterAsBytes = await stub.getState(key);
-  if (!letterAsBytes || letterAsBytes.toString().length <= 0) {
-    throw new Error(args[0] + ' (the arg0) does not exist: ' + Buffer.from(letterId) + ' [key searched:]' + key );
+  let itemAsBytes = await stub.getState(key);
+  if (!itemAsBytes || itemAsBytes.toString().length <= 0) {
+    throw new Error(args[0] + ' (the arg0) does not exist: [key searched:]' + key );
   }
-  //console.log(letterAsBytes.toString());
-  return letterAsBytes;
+  return itemAsBytes;
 }
-async deleteAllLetters(stub) {
-  //var logger = shim.NewLogger("myChaincode")
-  try {
-    console.log('============= START : rmrf ===========');
-    let iterator = await stub.getStateByRange('', '');
-    while (true) {
-      const res = await iterator.next();
-      console.log('##### RMRF: ' + util.inspect(res));
-      let jsonRes = {};
-      jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-      if (jsonRes.Record.docType == 'letter') {
-        console.log('##### DELETING: ' + util.inspect(res.value.key));
-        await stub.deleteState(res.value.key);
-      }
-      if (res.done) {
-        console.log('end of data - closing iterator');
-        var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));
-        stub.setEvent("letterAction",resultAsBytes);  
 
-        await iterator.close();
-        return;
-      }
-    }
-  } catch(error) {
-    throw new Error(error);
-  }
-}
-async listLetters(stub, args) {
+async list(stub, args) {
+  let docType = args[0];
+  let noType = false;
+  if (docType==null || docType=='') noType=true;
   let iterator = await stub.getStateByRange('','');
   let allResults = [];
   while (true) {
@@ -161,16 +92,12 @@ async listLetters(stub, args) {
       jsonRes.Key = res.value.key;
       try {
         jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-
       } catch (err) {
         console.log(err);
         jsonRes.Record = res.value.value.toString('utf8');
       }
-      if (jsonRes.Record.docType == 'letter') {
-          allResults.push({
-            "letterId":jsonRes.Record.letterId, 
-            "letterDescription":jsonRes.Record.letterDescription, 
-            "letterStatus":jsonRes.Record.letterStatus});
+      if (noType || jsonRes.Record.docType == docType) {
+          allResults.push(jsonRes.Record);
       }
     }
     
@@ -182,83 +109,70 @@ async listLetters(stub, args) {
     }
   }
 }
-async action(stub, args) {
+
+async update(stub, args) {
   try {
-    let incoming = JSON.parse(args[0]);
-    let key = 'LETTER.' + incoming["letterId"];
-    let action = incoming["action"];
-    let letterAsBytes = await stub.getState(key);
-    if (!letterAsBytes || letterAsBytes.length==0) {
+    let item = JSON.parse(args[0]);
+    let key = item.docType+'.'+item.id;
+    //let action = item.action;
+
+    let itemBytes = await stub.getState(key);
+    if (!itemBytes || itemBytes.length==0) {
       throw new Error("couldn't find "+key);
     }
-    let letter = JSON.parse(letterAsBytes.toString());
+    let origItem = JSON.parse(itemBytes.toString());
+
     var caller = stub.getCreator();
-    let callerRoles = letter.roleIdentities.filter(role => role.mspid==caller.mspid).map(y => y.role).reduce((a, b) => a.concat(b), []);
-    console.log(">>> ACTION: "+ "Caller: " + caller.mspid + ", Action: " + action + ", Status: " + letter.letterStatus + ", MSP-roles:"+callerRoles.join(","));
+    var response = {"result":"SUCCESS","action":"update","caller":caller.mspid,"newStatus":item.status};
+    origItem.history.push(response);
+    item.history=origItem.history;
+    response.updatedKey=key;
+    response.item=item.id;
+    response.docType=item.docType;
+    
+    var resultAsBytes=Buffer.from(JSON.stringify(response));
+    stub.setEvent("update",resultAsBytes);
+    await stub.putState(key, Buffer.from(JSON.stringify(item)));
+    return resultAsBytes;
+  } catch(error) {
+    throw new Error(error);
+  }
+} 
+
+async action(stub, args) {
+  try {
+    let item = JSON.parse(args[0]);
+    let key = item.docType+'.'+item.id;
+    let action = item.action;
+    let itemBytes = await stub.getState(key);
+    if (!itemBytes || itemBytes.length==0) {
+      throw new Error("couldn't find "+key);
+    }
+    let item = JSON.parse(itemBytes.toString());
+    var caller = stub.getCreator();
+    /*let callerRoles = item.roleIdentities.filter(role => role.mspid==caller.mspid).map(y => y.role).reduce((a, b) => a.concat(b), []);
+    console.log(">>> ACTION: "+ "Caller: " + caller.mspid + ", Action: " + action + ", Status: " + item.status + ", MSP-roles:"+callerRoles.join(","));
     let badAction = function(){
-      var errorText="{'error':'Caller: " + caller.mspid + "(ROLES: " + callerRoles.join(",") + ") not permitted to " + action + " while letter status is " + letter.letterStatus + "'}";
-      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"ERROR","action":action,"caller":caller.mspid,"newStatus":letter.letterStatus}));
-      stub.setEvent("letterAction",resultAsBytes);  
+      var errorText="{'error':'Caller: " + caller.mspid + "(ROLES: " + callerRoles.join(",") + ") not permitted to " + action + " while letter status is " + item.status + "'}";
+      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":item.id,"result":"ERROR","action":action,"caller":caller.mspid,"newStatus":item.status}));
+      stub.setEvent("action",resultAsBytes);  
       throw new Error(errorText);
     };
-
-    var actorRoles=[];
-    switch (letter.letterStatus) {
+*/
+    //var actorRoles=[];
+    switch (item.status) {
       case "NEW":
-        actorRoles=["SELLERBANK"];
-        if (action=="CONFIRM" && callerRoles.includes("SELLERBANK")) {
-          callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-          });
-          letter.letterStatus="TERMS_SELLER_APPROVAL";
-        } else {
-          return badAction();
-        }
+        //actorRoles=["SELLERBANK"];
+        //if (action=="CONFIRM" && callerRoles.includes("SELLERBANK")) {
+        //  callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
+        //    letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
+        //  });
+          item.status="TERMS_SELLER_APPROVAL";
+        //} else {
+        //  return badAction();
+        //}
         break;
-      case "TERMS_SELLER_APPROVAL":
-      case "TERMS_BUYER_APPROVAL":
-        var actor = (letter.letterStatus=="TERMS_SELLER_APPROVAL")?"SELLER":"BUYER";
-        actorRoles=[actor+"BANK",actor];
-        // actor APPROVE
-        if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
-          console.log("Running APPROVE on letter " + letter.letterId + " as actor: " + actor);
-          callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-          });
-          console.log("approval records: " + util.inspect(letter.approvalRecord));
-          console.log("actor Roles: " + util.inspect(actorRoles));
-          //full actor approval means we can skip buyer re-approval
-          if (actorRoles.every(role => letter.approvalRecord.map(y => y.ROLE).reduce((a, b) => a.concat(b), []).includes(role))) {
-             letter.letterStatus="TERMS_APPROVED";
-             console.log("All required approval roles have approved, setting to APPROVED.");
-          } else {
-             console.log("Still waiting on additional approvals.");
-          }
-             
-        // actor COUNTER
-        } else if (action=="COUNTER" && callerRoles.some(x=> actorRoles.includes(x))) {
-          console.log("Running COUNTER on letter " + letter.letterId + " as actor: " + actor);
-          //remove all approvals due to counter
-          letter.approvalRecord = letter.approvalRecord.filter(x => ["TERMS_SELLER_APPROVAL","TERMS_BUYER_APPROVAL"].includes(x["STAGE"]));
-          letter.productDetails = incoming["counter"].productDetails;
-          letter.rules = incoming["counter"].rules;
-          letter.letterStatus=( (actor=="SELLER")?"TERMS_BUYER_APPROVAL":"TERMS_SELLER_APPROVAL" );
-        } else {
-          return badAction();
-        }
-        break;
-      case "TERMS_APPROVED":
-        actorRoles=["SELLER"];
-        if (action=="CONFIRM" && callerRoles.some(x=> actorRoles.includes(x))) {
-          callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-          });
-          letter.letterStatus="SHIPPED";
-        } else {
-          return badAction();
-        }
-        break;
-      case "SHIPPED":
+/*      case "SHIPPED":
         actorRoles=["SELLER", "THIRDPARTY"];
         if (action=="CONFIRM" && callerRoles.includes("SELLER")){
           //CHECK FOR EXISTENCE OF REQUIRED AUTOMATIC RULES
@@ -294,7 +208,7 @@ async action(stub, args) {
         } else {
           return badAction();
         }
-        break;
+        break;*/
       default:
           if (action=="FORCEUPDATESTATUS") {
             letter.letterStatus=incoming.status;
@@ -303,9 +217,9 @@ async action(stub, args) {
              return badAction();
           }
     }
-    var resultAsBytes=Buffer.from(JSON.stringify({"letterId":letter.letterId,"result":"SUCCESS","action":action,"caller":caller.mspid,"newStatus":letter.letterStatus}));
-    stub.setEvent("letterAction",resultAsBytes);
-    await stub.putState("LETTER."+letter.letterId, Buffer.from(JSON.stringify(letter)));
+    var resultAsBytes=Buffer.from(JSON.stringify({"item":item.id,"result":"SUCCESS","action":action,"caller":caller.mspid,"newStatus":item.status}));
+    stub.setEvent("action",resultAsBytes);
+    await stub.putState(key, Buffer.from(JSON.stringify(item)));
     return resultAsBytes;
   } catch(error) {
     throw new Error(error);
