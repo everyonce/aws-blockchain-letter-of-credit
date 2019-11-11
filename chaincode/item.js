@@ -65,10 +65,8 @@ async create(stub, args) {
   }
 }
 async get(stub, args) {
-  console.log('============= START : getletter ===========');
+  console.log('============= START : get ===========');
   let key = args[0];
-  //let key = 'LETTER.' + letterId;
-  
   let itemAsBytes = await stub.getState(key);
   if (!itemAsBytes || itemAsBytes.toString().length <= 0) {
     throw new Error(args[0] + ' (the arg0) does not exist: [key searched:]' + key );
@@ -129,7 +127,7 @@ async update(stub, args) {
     response.updatedKey=key;
     response.item=item.id;
     response.docType=item.docType;
-    
+
     var resultAsBytes=Buffer.from(JSON.stringify(response));
     stub.setEvent("update",resultAsBytes);
     await stub.putState(key, Buffer.from(JSON.stringify(item)));
@@ -139,94 +137,6 @@ async update(stub, args) {
   }
 } 
 
-async action(stub, args) {
-  try {
-    let item = JSON.parse(args[0]);
-    let key = item.docType+'.'+item.id;
-    let action = item.action;
-    let itemBytes = await stub.getState(key);
-    if (!itemBytes || itemBytes.length==0) {
-      throw new Error("couldn't find "+key);
-    }
-    let item = JSON.parse(itemBytes.toString());
-    var caller = stub.getCreator();
-    /*let callerRoles = item.roleIdentities.filter(role => role.mspid==caller.mspid).map(y => y.role).reduce((a, b) => a.concat(b), []);
-    console.log(">>> ACTION: "+ "Caller: " + caller.mspid + ", Action: " + action + ", Status: " + item.status + ", MSP-roles:"+callerRoles.join(","));
-    let badAction = function(){
-      var errorText="{'error':'Caller: " + caller.mspid + "(ROLES: " + callerRoles.join(",") + ") not permitted to " + action + " while letter status is " + item.status + "'}";
-      var resultAsBytes=Buffer.from(JSON.stringify({"letterId":item.id,"result":"ERROR","action":action,"caller":caller.mspid,"newStatus":item.status}));
-      stub.setEvent("action",resultAsBytes);  
-      throw new Error(errorText);
-    };
-*/
-    //var actorRoles=[];
-    switch (item.status) {
-      case "NEW":
-        //actorRoles=["SELLERBANK"];
-        //if (action=="CONFIRM" && callerRoles.includes("SELLERBANK")) {
-        //  callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-        //    letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-        //  });
-          item.status="TERMS_SELLER_APPROVAL";
-        //} else {
-        //  return badAction();
-        //}
-        break;
-/*      case "SHIPPED":
-        actorRoles=["SELLER", "THIRDPARTY"];
-        if (action=="CONFIRM" && callerRoles.includes("SELLER")){
-          //CHECK FOR EXISTENCE OF REQUIRED AUTOMATIC RULES
-          //CHECK FOR SIGNOFF ON MANUAL RULES
-          callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-          });
-          letter.letterStatus="PACKET_SELLER_READY";
-        } else if (action=="ADD_DOCUMENT" && callerRoles.some(x=> actorRoles.includes(x))) {
-          //add documents
-        } else {
-          return badAction();
-        }
-        break;
-      case "PACKET_SELLER_READY":
-        actorRoles=["SELLERBANK"];
-        if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
-          callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-          });
-          letter.letterStatus="PACKET_BUYER_READY";
-        } else {
-          return badAction();
-        }
-        break;
-      case "PACKET_BUYER_READY":
-        actorRoles=["BUYERBANK"];
-        if (action=="APPROVE" && callerRoles.some(x=> actorRoles.includes(x))) {
-          callerRoles.filter(x=> actorRoles.includes(x)).forEach(role=>{
-            letter.approvalRecord.push({"STAGE": letter.letterStatus, "ROLE":role, "MSP":caller.mspid, "ACTION":action, "TIMESTAMP":stub.getTxTimestamp()});
-          });
-          letter.letterStatus="CLOSED";
-        } else {
-          return badAction();
-        }
-        break;*/
-      default:
-          if (action=="FORCEUPDATESTATUS") {
-            letter.letterStatus=incoming.status;
-            //force=true;
-          } else {
-             return badAction();
-          }
-    }
-    var resultAsBytes=Buffer.from(JSON.stringify({"item":item.id,"result":"SUCCESS","action":action,"caller":caller.mspid,"newStatus":item.status}));
-    stub.setEvent("action",resultAsBytes);
-    await stub.putState(key, Buffer.from(JSON.stringify(item)));
-    return resultAsBytes;
-  } catch(error) {
-    throw new Error(error);
-  }
-  
-}
-  
 /**
  * Retrieves the Fabric block and transaction details for a key or an array of keys
  * 

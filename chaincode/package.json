@@ -1,13 +1,13 @@
 {
-	"name": "letter",
+	"name": "item",
 	"version": "0.0.1",
-	"description": "ngo letter.js",
+	"description": "chaincode simple item management",
 	"engines": {
 		"node": ">=8.4.0",
 		"npm": ">=5.3.0"
 	},
 	"scripts": {
-		"start": "node letter.js"
+		"start": "node item.js"
 	},
 	"engine-strict": true,
 	"license": "Apache-2.0",

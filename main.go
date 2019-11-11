@@ -1,6 +1,7 @@
 package main
 
 import (
+	json "encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -200,6 +201,13 @@ func createEventHub() {
 	}
 }
 
+type objType struct {
+	id      string
+	docType string
+	history []interface{}
+	data    interface{}
+}
+
 type serverType struct {
 	router *mux.Router
 	url    string
@@ -213,11 +221,10 @@ func newServer() *serverType {
 }
 
 func (s *serverType) RegisterHTTPHandlers() {
-	s.router.HandleFunc("/listLetters", s.httpListLetters)
-	s.router.HandleFunc("/letter/{letterId}", s.httpLetterDetail)
-	s.router.HandleFunc("/createLetter", s.httpCreateLetter)
-	s.router.HandleFunc("/action", s.httpAction)
-	s.router.HandleFunc("/deleteAllLetters", s.httpDeleteAllLetters)
+	s.router.HandleFunc("/order/{orderId}", s.httpOrderDetail)
+	s.router.HandleFunc("/listOrders", s.httpListOrders)
+	s.router.HandleFunc("/createOrder", s.httpCreateOrder)
+	s.router.HandleFunc("/updateOrder", s.httpUpdateOrder)
 	s.router.HandleFunc("/ws", serveWs)
 	s.router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 	s.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./site/")))
@@ -231,43 +238,50 @@ func (s *serverType) Start() error {
 	return http.ListenAndServe(s.url, handler)
 }
 
-func (s *serverType) httpListLetters(w http.ResponseWriter, r *http.Request) {
-	runCC(w, r, "query", "listLetters", [][]byte{})
+func injectDocType(objBytesInput []byte, docType string) ([]byte, error) {
+	//json marshal to object from string
+	var obj objType
+	err := json.Unmarshal(objBytesInput, &obj)
+	if err != nil {
+		return objBytesInput, err
+	}
+	obj.docType = docType
+	objBytesOutput, err := json.Marshal(obj)
+	if err != nil {
+		return objBytesInput, err
+	}
+	return objBytesOutput, nil
 }
 
-func (s *serverType) httpCreateLetter(w http.ResponseWriter, r *http.Request) {
+/*    ACTUAL API-SPECIFIC CODE      */
+
+func (s *serverType) httpListOrders(w http.ResponseWriter, r *http.Request) {
+	runCC(w, r, "query", "list", convertArgs([]string{"ORDER"}))
+}
+
+func (s *serverType) httpCreateOrder(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
-	runCC(w, r, "invoke", "createLetter", [][]byte{body})
+	runCC(w, r, "invoke", "create", [][]byte{body})
 }
 
-func (s *serverType) httpAction(w http.ResponseWriter, r *http.Request) {
+func (s *serverType) httpUpdateOrder(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
-	runCC(w, r, "invoke", "action", [][]byte{body})
+	runCC(w, r, "invoke", "update", [][]byte{body})
 }
 
-func (s *serverType) httpDeleteAllLetters(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("Error reading body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
-		return
-	}
-	runCC(w, r, "invoke", "deleteAllLetters", [][]byte{body})
-}
-
-func (s *serverType) httpLetterDetail(w http.ResponseWriter, r *http.Request) {
+func (s *serverType) httpOrderDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	runCC(w, r, "query", "getLetter", convertArgs([]string{vars["letterId"]}))
+	runCC(w, r, "query", "get", convertArgs([]string{"ORDER." + vars["orderId"]}))
 }
 
 func runCC(w http.ResponseWriter, r *http.Request, method string, functionName string, args [][]byte) {
@@ -404,54 +418,8 @@ func equalASCIIFold(s, t string) bool {
 var defaultPorts = map[string]string{"http": "80", "https": "443"}
 
 func checkSameOrigin(r *http.Request) bool {
-	return true //temp for testing
-	/*
-		origin := r.Header["Origin"]
-		//log.Printf("Checking CORS ORigin: %s", origin)
-		if len(origin) == 0 {
-			return true
-		}
-		u, err := url.Parse(origin[0])
-		//log.Printf("Checking CORS Origin: %s", u)
-
-		if err != nil {
-			return false
-		}
-		if equalASCIIFold(u.Host, r.Host) {
-			return true
-		}
-
-		host1, _, err := net.SplitHostPort(u.Host)
-		host2, _, err := net.SplitHostPort(r.Host)
-
-		if equalASCIIFold(host1, host2) {
-			return true
-		}
-
-		defaultPort, ok := defaultPorts[u.Scheme]
-		//log.Printf("Checking CORS Origin: %s", defaultPort)
-
-		if !ok {
-			return false
-		}
-
-		host, port, err := net.SplitHostPort(u.Host)
-
-		if err == nil {
-			match := port == defaultPort && equalASCIIFold(host, r.Host)
-			log.Printf("Websocket Upgrade CORS: ports match (%s, %s) and (request) hosts match (%s, %s): %v", port, defaultPort, host, r.Host, match)
-			return match
-		}
-
-		host, port, err = net.SplitHostPort(r.Host)
-		if err == nil {
-			match := port == defaultPort && equalASCIIFold(u.Host, host)
-			log.Printf("Websocket Upgrade CORS: ports match (%s, %s) and (origin) hosts match (%s, %s): %v", port, defaultPort, host, r.Host, match)
-			return match
-		}
-
-		return false
-	*/
+	//stub - replace for actual security on your api!
+	return true
 }
 
 var upgrader = websocket.Upgrader{
