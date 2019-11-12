@@ -9,6 +9,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/schema v1.1.0
 	github.com/gorilla/websocket v1.4.0

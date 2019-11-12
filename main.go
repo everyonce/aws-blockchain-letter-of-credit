@@ -9,6 +9,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/google/uuid"
+
 	"github.com/spf13/viper"
 
 	"github.com/gorilla/mux"
@@ -51,7 +53,7 @@ func main() {
 	for {
 		select {
 		case <-time.After(time.Second * 5):
-			//	fmt.Println("timeout while waiting for chaincode event")
+			//      fmt.Println("timeout while waiting for chaincode event")
 		}
 	}
 }
@@ -106,59 +108,59 @@ func createSetup() {
 	}
 	//check for chaincode install
 	_, _ = resmgmtClient.QueryInstalledChaincodes()
-	/*	ccPkg, err := gopackager.NewCCPackage("/opt/gopath/src/github.com/hyperledger/fabric-samples/chaincode/letter-of-credit-chaincode",
-			 "")
-			if err != nil {
-				log.Fatalf("failed to create chaincode package: %v", err)
-			}
-			fmt.Println("ccPkg created")
-		ccPkg.Type=peer.Chain
-		installCCReq := resmgmt.InstallCCRequest{Name: setup.ChainCodeID, Path: setup.ChaincodePath, Version: "0", Package: ccPkg}
+	/*      ccPkg, err := gopackager.NewCCPackage("/opt/gopath/src/github.com/hyperledger/fabric-samples/chaincode/letter-of-credit-chaincode",
+	                 "")
+	                if err != nil {
+	                        log.Fatalf("failed to create chaincode package: %v", err)
+	                }
+	                fmt.Println("ccPkg created")
+	        ccPkg.Type=peer.Chain
+	        installCCReq := resmgmt.InstallCCRequest{Name: setup.ChainCodeID, Path: setup.ChaincodePath, Version: "0", Package: ccPkg}
 
-			   	// Create new resource management client
-			   c, err := New(mockClientProvider())
-			   if err != nil {
-			       fmt.Println("failed to create client")
-			   }
+	                        // Create new resource management client
+	                   c, err := New(mockClientProvider())
+	                   if err != nil {
+	                       fmt.Println("failed to create client")
+	                   }
 
-			   // Read channel configuration
-			   channelConfigPath := filepath.Join(metadata.GetProjectPath(), metadata.ChannelConfigPath, channelConfigFile)
-			   r, err := os.Open(channelConfigPath)
-			   if err != nil {
-			       fmt.Printf("failed to open channel config: %s\n", err)
-			   }
-			   defer r.Close()
+	                   // Read channel configuration
+	                   channelConfigPath := filepath.Join(metadata.GetProjectPath(), metadata.ChannelConfigPath, channelConfigFile)
+	                   r, err := os.Open(channelConfigPath)
+	                   if err != nil {
+	                       fmt.Printf("failed to open channel config: %s\n", err)
+	                   }
+	                   defer r.Close()
 
-			   // Create new channel 'mychannel'
-			   _, err = c.SaveChannel(SaveChannelRequest{ChannelID: "mychannel", ChannelConfig: r})
-			   if err != nil {
-			       fmt.Printf("failed to save channel: %s\n", err)
-			   }
+	                   // Create new channel 'mychannel'
+	                   _, err = c.SaveChannel(SaveChannelRequest{ChannelID: "mychannel", ChannelConfig: r})
+	                   if err != nil {
+	                       fmt.Printf("failed to save channel: %s\n", err)
+	                   }
 
-			   peer := mockPeer()
+	                   peer := mockPeer()
 
-			   // Peer joins channel 'mychannel'
-			   err = c.JoinChannel("mychannel", WithTargets(peer))
-			   if err != nil {
-			       fmt.Printf("failed to join channel: %s\n", err)
-			   }
+	                   // Peer joins channel 'mychannel'
+	                   err = c.JoinChannel("mychannel", WithTargets(peer))
+	                   if err != nil {
+	                       fmt.Printf("failed to join channel: %s\n", err)
+	                   }
 
-			   // Install example chaincode to peer
-			   installReq := InstallCCRequest{Name: "ExampleCC", Version: "v0", Path: "path", Package: &resource.CCPackage{Type: 1, Code: []byte("bytes")}}
-			   _, err = c.InstallCC(installReq, WithTargets(peer))
-			   if err != nil {
-			       fmt.Printf("failed to install chaincode: %s\n", err)
-			   }
+	                   // Install example chaincode to peer
+	                   installReq := InstallCCRequest{Name: "ExampleCC", Version: "v0", Path: "path", Package: &resource.CCPackage{Type: 1, Code: []byte("bytes")}}
+	                   _, err = c.InstallCC(installReq, WithTargets(peer))
+	                   if err != nil {
+	                       fmt.Printf("failed to install chaincode: %s\n", err)
+	                   }
 
-			   // Instantiate example chaincode on channel 'mychannel'
-			   ccPolicy := cauthdsl.SignedByMspMember("Org1MSP")
-			   instantiateReq := InstantiateCCRequest{Name: "ExampleCC", Version: "v0", Path: "path", Policy: ccPolicy}
-			   _, err = c.InstantiateCC("mychannel", instantiateReq, WithTargets(peer))
-			   if err != nil {
-			       fmt.Printf("failed to install chaincode: %s\n", err)
-			   }
+	                   // Instantiate example chaincode on channel 'mychannel'
+	                   ccPolicy := cauthdsl.SignedByMspMember("Org1MSP")
+	                   instantiateReq := InstantiateCCRequest{Name: "ExampleCC", Version: "v0", Path: "path", Policy: ccPolicy}
+	                   _, err = c.InstantiateCC("mychannel", instantiateReq, WithTargets(peer))
+	                   if err != nil {
+	                       fmt.Printf("failed to install chaincode: %s\n", err)
+	                   }
 
-			   fmt.Println("Network setup completed")*/
+	                   fmt.Println("Network setup completed")*/
 }
 func createChannel(name string, resmgmtClient *resmgmt.Client, si msp.SigningIdentity) {
 	req := resmgmt.SaveChannelRequest{
@@ -202,10 +204,11 @@ func createEventHub() {
 }
 
 type objType struct {
-	id      string
-	docType string
-	history []interface{}
-	data    interface{}
+	ID      string        `json:"id"`
+	DocType string        `json:"docType"`
+	Status  string        `json:"status"`
+	History []interface{} `json:"history,omitempty"`
+	Data    interface{}   `json:"data"`
 }
 
 type serverType struct {
@@ -222,9 +225,13 @@ func newServer() *serverType {
 
 func (s *serverType) RegisterHTTPHandlers() {
 	s.router.HandleFunc("/order/{orderId}", s.httpOrderDetail)
-	s.router.HandleFunc("/listOrders", s.httpListOrders)
-	s.router.HandleFunc("/createOrder", s.httpCreateOrder)
-	s.router.HandleFunc("/updateOrder", s.httpUpdateOrder)
+	s.router.HandleFunc("/order/list", s.httpListOrders)
+	s.router.HandleFunc("/order/create", s.httpCreateOrder)
+	s.router.HandleFunc("/order/update", s.httpUpdateOrder)
+	s.router.HandleFunc("/shipment/{orderId}", s.httpShipmentDetail)
+	s.router.HandleFunc("/shipment/list", s.httpListShipments)
+	s.router.HandleFunc("/shipment/create", s.httpCreateShipment)
+	s.router.HandleFunc("/shipment/update", s.httpUpdateShipment)
 	s.router.HandleFunc("/ws", serveWs)
 	s.router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 	s.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./site/")))
@@ -237,51 +244,99 @@ func (s *serverType) Start() error {
 
 	return http.ListenAndServe(s.url, handler)
 }
+func create(docType string, obj []byte) ([]byte, error) {
+	var newObj objType
+	newID, _ := uuid.NewRandom()
+	newObj.ID = newID.String()
+	newObj.DocType = docType
 
-func injectDocType(objBytesInput []byte, docType string) ([]byte, error) {
-	//json marshal to object from string
-	var obj objType
-	err := json.Unmarshal(objBytesInput, &obj)
+	//DECOMPRESS GIVEN DATA JSON BYTES
+	var newObjData interface{}
+	err := json.Unmarshal(obj, &newObjData)
 	if err != nil {
-		return objBytesInput, err
+		return obj, err
 	}
-	obj.docType = docType
-	objBytesOutput, err := json.Marshal(obj)
+	//ADD DATA TO NEW OBJECT
+	newObj.Data = newObjData
+	//RECOMPRESS TO JSON BYTES
+	objBytesOutput, err := json.MarshalIndent(newObj, "", "  ")
 	if err != nil {
-		return objBytesInput, err
+		return obj, err
+	}
+	return objBytesOutput, nil
+}
+
+func clean(docType string, obj []byte) ([]byte, error) {
+
+	//DECOMPRESS GIVEN DATA JSON BYTES
+	var newObjData objType
+	err := json.Unmarshal(obj, &newObjData)
+	if err != nil {
+		return obj, err
+	}
+	//ADD DATA TO NEW OBJECT
+	//newObj.Data = newObjData
+	newObjData.DocType = docType
+	//RECOMPRESS TO JSON BYTES
+	objBytesOutput, err := json.MarshalIndent(newObjData, "", "  ")
+	if err != nil {
+		return obj, err
 	}
 	return objBytesOutput, nil
 }
 
 /*    ACTUAL API-SPECIFIC CODE      */
 
-func (s *serverType) httpListOrders(w http.ResponseWriter, r *http.Request) {
-	runCC(w, r, "query", "list", convertArgs([]string{"ORDER"}))
-}
-
-func (s *serverType) httpCreateOrder(w http.ResponseWriter, r *http.Request) {
+func genericOperation(docType string, op string, w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
-	runCC(w, r, "invoke", "create", [][]byte{body})
+	newObj, err := clean(docType, body)
+	if err != nil {
+		log.Printf("Error reading body: %v", err)
+		http.Error(w, "can't read body", http.StatusBadRequest)
+		return
+	}
+	runCC(w, r, "invoke", op, [][]byte{newObj})
+}
+
+// WE EXPECT ID, STATUS, DATA
+func (s *serverType) httpCreateOrder(w http.ResponseWriter, r *http.Request) {
+	genericOperation("ORDER", "create", w, r)
 }
 
 func (s *serverType) httpUpdateOrder(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("Error reading body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
-		return
-	}
-	runCC(w, r, "invoke", "update", [][]byte{body})
+	genericOperation("ORDER", "update", w, r)
+}
+
+func (s *serverType) httpListOrders(w http.ResponseWriter, r *http.Request) {
+	runCC(w, r, "query", "list", convertArgs([]string{"ORDER"}))
 }
 
 func (s *serverType) httpOrderDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	runCC(w, r, "query", "get", convertArgs([]string{"ORDER." + vars["orderId"]}))
+}
+
+// WE EXPECT ID, STATUS, DATA
+func (s *serverType) httpCreateShipment(w http.ResponseWriter, r *http.Request) {
+	genericOperation("SHIPMENT", "create", w, r)
+}
+
+func (s *serverType) httpUpdateShipment(w http.ResponseWriter, r *http.Request) {
+	genericOperation("SHIPMENT", "update", w, r)
+}
+
+func (s *serverType) httpListShipments(w http.ResponseWriter, r *http.Request) {
+	runCC(w, r, "query", "list", convertArgs([]string{"SHIPMENT"}))
+}
+
+func (s *serverType) httpShipmentDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	runCC(w, r, "query", "get", convertArgs([]string{"SHIPMENT." + vars["orderId"]}))
 }
 
 func runCC(w http.ResponseWriter, r *http.Request, method string, functionName string, args [][]byte) {
