@@ -61,21 +61,18 @@ func main() {
 func createSetup() {
 	thisConfig := config.FromFile(viper.GetString("fabric.configfile"))
 	sdk, err := fabsdk.New(thisConfig)
-	//configBackend, err := sdk.Config()
-	clientProvider := sdk.Context(fabsdk.WithUser("admin"))
-	//endpointConfig, err := fab.ConfigFromBackend(configBackend)
-	//u := endpointConfig.NetworkPeers()
-	//k, _ := json.Marshal(u)
-	//fmt.Println(string(k))
+	log.Printf("config: %v", viper.GetString("fabric.configfile"))
+	clientProvider := sdk.Context(fabsdk.WithUser(viper.GetString("fabric.user")))
 	contextClient, err := clientProvider()
 	if err != nil {
 		log.Fatalf("error creating p: %v", err)
 	}
+
 	orgName := contextClient.IdentityConfig().Client().Organization
 	log.Printf("Using Org name to get MSP Client: %v", orgName)
 	mspClient, err := mspC.New(clientProvider, mspC.WithOrg(orgName))
 
-	signingIdentity, _ := mspClient.GetSigningIdentity("admin")
+	signingIdentity, _ := mspClient.GetSigningIdentity(viper.GetString("fabric.user"))
 	log.Printf("got msp client with signing id mspid: %v", signingIdentity.Identifier().MSPID)
 
 	t, _ := contextClient.LocalDiscoveryProvider().CreateLocalDiscoveryService(signingIdentity.Identifier().MSPID)
@@ -224,14 +221,14 @@ func newServer() *serverType {
 }
 
 func (s *serverType) RegisterHTTPHandlers() {
-	s.router.HandleFunc("/order/{orderId}", s.httpOrderDetail)
 	s.router.HandleFunc("/order/list", s.httpListOrders)
 	s.router.HandleFunc("/order/create", s.httpCreateOrder)
 	s.router.HandleFunc("/order/update", s.httpUpdateOrder)
-	s.router.HandleFunc("/shipment/{orderId}", s.httpShipmentDetail)
+	s.router.HandleFunc("/order/{orderId}", s.httpOrderDetail)
 	s.router.HandleFunc("/shipment/list", s.httpListShipments)
 	s.router.HandleFunc("/shipment/create", s.httpCreateShipment)
 	s.router.HandleFunc("/shipment/update", s.httpUpdateShipment)
+	s.router.HandleFunc("/shipment/get/{shipmentId}", s.httpShipmentDetail)
 	s.router.HandleFunc("/ws", serveWs)
 	s.router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 	s.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./site/")))
@@ -336,7 +333,7 @@ func (s *serverType) httpListShipments(w http.ResponseWriter, r *http.Request) {
 
 func (s *serverType) httpShipmentDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	runCC(w, r, "query", "get", convertArgs([]string{"SHIPMENT." + vars["orderId"]}))
+	runCC(w, r, "query", "get", convertArgs([]string{"SHIPMENT." + vars["shipmentId"]}))
 }
 
 func runCC(w http.ResponseWriter, r *http.Request, method string, functionName string, args [][]byte) {
