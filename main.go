@@ -221,6 +221,10 @@ func newServer() *serverType {
 }
 
 func (s *serverType) RegisterHTTPHandlers() {
+	s.router.HandleFunc("/item/list", s.httpListItems)
+	s.router.HandleFunc("/item/create", s.httpCreateItem)
+	s.router.HandleFunc("/item/update", s.httpUpdateItem)
+	s.router.HandleFunc("/item/{itemId}", s.httpItemDetail)
 	s.router.HandleFunc("/order/list", s.httpListOrders)
 	s.router.HandleFunc("/order/create", s.httpCreateOrder)
 	s.router.HandleFunc("/order/update", s.httpUpdateOrder)
@@ -334,6 +338,24 @@ func (s *serverType) httpListShipments(w http.ResponseWriter, r *http.Request) {
 func (s *serverType) httpShipmentDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	runCC(w, r, "query", "get", convertArgs([]string{"SHIPMENT." + vars["shipmentId"]}))
+}
+
+// WE EXPECT ID, STATUS, DATA
+func (s *serverType) httpCreateItem(w http.ResponseWriter, r *http.Request) {
+	genericOperation("ITEM", "create", w, r)
+}
+
+func (s *serverType) httpUpdateItem(w http.ResponseWriter, r *http.Request) {
+	genericOperation("ITEM", "update", w, r)
+}
+
+func (s *serverType) httpListItems(w http.ResponseWriter, r *http.Request) {
+	runCC(w, r, "query", "list", convertArgs([]string{"ITEM"}))
+}
+
+func (s *serverType) httpItemDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	runCC(w, r, "query", "get", convertArgs([]string{"ITEM." + vars["itemId"]}))
 }
 
 func runCC(w http.ResponseWriter, r *http.Request, method string, functionName string, args [][]byte) {
