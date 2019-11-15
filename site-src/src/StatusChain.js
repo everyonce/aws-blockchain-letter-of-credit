@@ -5,10 +5,11 @@ import moment from 'moment';
 
     export default function StatusChain(props) {
 
-        var p = props.statusList.findIndex(x=>x.status===props.letter.letterStatus);
+        //var p = props.statusList.findIndex(x=>x.status===props.letter.letterStatus);
         return (
             <div style={{display: 'flex', margin: '0px', alignItems: 'center', textAlign: 'center'}}>
-              { props.statusList.map((x, i) => 
+                status chain
+              { /*props.statusList.map((x, i) => 
                 { 
                     var stageApprovals=props.letter.approvalRecord.filter(z=>z.STAGE===x.status);
                     var stageDescription=(<React.Fragment>
@@ -44,7 +45,8 @@ import moment from 'moment';
                         </div>
                     </Tooltip>
                     </React.Fragment>);
-              })}
+              })
+            */}
               </div>
         )
     }

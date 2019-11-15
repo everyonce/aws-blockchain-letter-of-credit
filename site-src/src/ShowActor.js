@@ -53,7 +53,7 @@ function ShowActor(props) {
     let actorActions=[];
     const statusList = getStatusTypes();
     let thisStatus = statusList[statusList.findIndex(x=>x.status===letter.letterStatus)];
-    let actorCan = thisStatus.whoCan.filter(x=> props.actor in x);
+    /* let actorCan = thisStatus.whoCan.filter(x=> props.actor in x);
 
     if (actorCan.length>0) {
         s.border= '2px solid #005A95';
@@ -61,7 +61,8 @@ function ShowActor(props) {
         s.color='#005A95';
         sel=true;
         actorActions = actorCan[0][props.actor]; 
-    }
+    }*/
+    actorActions=["do thing 1", "do thing 2"];
     return (
         <div style={s}>
             <ActorIcon sel={sel} {...props} /><br />

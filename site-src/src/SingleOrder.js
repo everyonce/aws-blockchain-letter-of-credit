@@ -8,20 +8,20 @@ import getStatusTypes from './LetterStatusTypes';
 import ShowActor from './ShowActor';
 import axios from 'axios';
 
-const fetchLetter = async (letterId, apiUrl) => {
-  const response = await axios.get(apiUrl + '/letter/' + letterId);
+const fetchLetter = async (id, apiUrl) => {
+  const response = await axios.get(apiUrl + '/order/' + id);
   return response.data;
 };
 
-export default function SingleLetter(props) {
+export default function SingleOrder(props) {
     const statusList = getStatusTypes();
     const [item, setItem] = React.useState();
     
     React.useEffect(() => {
       if(!item) {
-        fetchLetter(props.letterId,props.config.apiUrl).then(result=>setItem(result));
+        fetchLetter(props.id,props.config.apiUrl).then(result=>setItem(result));
       }
-    }, [props.letterId,props.config.apiUrl,item]);
+    }, [props.id,props.config.apiUrl,item]);
 
 
     if (!item )  {
@@ -31,8 +31,8 @@ export default function SingleLetter(props) {
     }
 
     props.config.addUpdateHook(
-      props.letterId, 
-      () => fetchLetter(props.letterId, props.config.apiUrl).then(result=>setItem(result))
+      props.id, 
+      () => fetchLetter(props.id, props.config.apiUrl).then(result=>setItem(result))
     );
 
     return (
@@ -52,7 +52,7 @@ export default function SingleLetter(props) {
         Next Step:<br/>
         </Typography>
         <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"center"}}>
-        {statusList[statusList.findIndex(x=>x.status===item.letterStatus)].desc}
+        {"No description" || statusList[statusList.findIndex(x=>x.status===item.status)].desc||"No description"}
     </Typography>
     </Grid>
   </Grid>   

@@ -36,14 +36,14 @@ export default function CreateWelcomePage(props) {
             <Container maxWidth="sm">
             <Typography variant="h4" gutterBottom>
               Amazon Managed Blockchain<br />
-              Letter of Credit Demo
+              Supply Chain Demo
             </Typography>
             <Typography variant="h6" gutterBottom>
               Network ID: {networkConstants.NetworkId}<br />
               Member ID: {networkConstants.MemberId}
             </Typography>
             <Typography gutterBottom>
-              Welcome to the demo Letter of Credit on Amazon Managed Blockchain!  You can use the buttons below to quickly create some demo LoCs, or use the last tab to create one specific to your demo needs.
+              Welcome to the supply chain demo on Amazon Managed Blockchain!  You can use the buttons below to quickly create some demo orders and shipments, or use the last tab to create one specific to your demo needs.
             </Typography>
             <DialogActions>
                     <Button
@@ -52,7 +52,7 @@ export default function CreateWelcomePage(props) {
                       onClick={createAll}
                       disabled={creating}
                     >
-                      Create Some Demo Letters
+                      Create Some Demo Orders
                     </Button>
                     <Button
                       type="button"
@@ -60,7 +60,7 @@ export default function CreateWelcomePage(props) {
                       onClick={deleteAll}
                       disabled={deleting}
                     >
-                      Delete All Letters
+                      Delete All Orders
                     </Button>
                     </DialogActions>
             </Container>

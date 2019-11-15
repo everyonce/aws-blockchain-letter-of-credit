@@ -10,7 +10,7 @@ import NoteAdd from '@material-ui/icons/NoteAdd';
 import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
 import Announcement from '@material-ui/icons/Announcement';
 import Paper from '@material-ui/core/Paper';
-import SingleLetter from './SingleLetter';
+import SingleOrder from './SingleOrder';
 import CreateLetterPanel from './CreateLetterPanel';
 import WelcomeLetterPanel from './WelcomeLetterPanel';
 
@@ -77,7 +77,7 @@ export default function TabBar(props) {
       </TabPanel>
       {items.map((l, index) => 
            <TabPanel value={selectedTab} index={index+1} key={'tabpanel-'+l.letterId}>
-             <SingleLetter key={'singleletter-'+l.letterId} config={props.config} letterId={l.letterId} 
+             <SingleOrder key={'singleorder-'+l.id} config={props.config} id={l.id} 
               />
             </TabPanel>
       )}

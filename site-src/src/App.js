@@ -18,9 +18,9 @@ export default class App extends Component {
   
   updateHooks= []
 
-  addUpdateHook = (letterId, updateFunc) => { 
-    this.updateHooks = this.updateHooks.filter(x => x.letterId !== letterId)
-    this.updateHooks.push({letterId: letterId, updateFunc: updateFunc});
+  addUpdateHook = (itemId, updateFunc) => { 
+    this.updateHooks = this.updateHooks.filter(x => x.itemId !== itemId)
+    this.updateHooks.push({itemId: itemId, updateFunc: updateFunc});
   }
 
 
@@ -44,10 +44,10 @@ export default class App extends Component {
             this.updateItems();
             break;
         case "CONFIRM":
-            this.updateHooks.find(x => x.letterId===jEvent["ccEvent"]["letterId"]).updateFunc();
+            this.updateHooks.find(x => x.itemId===jEvent["ccEvent"]["itemId"]).updateFunc();
             break;
         case "APPROVE":
-            this.updateHooks.find(x => x.letterId===jEvent["ccEvent"]["letterId"]).updateFunc();
+            this.updateHooks.find(x => x.itemId===jEvent["ccEvent"]["itemId"]).updateFunc();
             break;
         default:
           console.log("Got some other event");
@@ -57,7 +57,7 @@ export default class App extends Component {
 
   updateItems = () => {
     this.setState({ isLoading: true, items: [], error: null });
-    axios.get(this.config.apiUrl + '/listLetters')
+    axios.get(this.config.apiUrl + '/order/list')
       .then(result => 
         this.setState({
           items: result.data,
