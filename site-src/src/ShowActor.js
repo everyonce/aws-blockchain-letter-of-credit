@@ -1,6 +1,6 @@
 import React from 'react';
 import {BankIcon, PersonIcon, WarehouseIcon, FactoryIcon, TruckIcon} from './Icons';
-import getStatusTypes from './LetterStatusTypes';
+import getStatusTypes from './StatusTypes';
 import axios from 'axios';
 import { Typography, Button } from '@material-ui/core';
 
@@ -51,7 +51,7 @@ function ShowActor(props) {
         color: 'white'
     }
     let actorActions=[];
-    const statusList = getStatusTypes();
+    const statusList = getStatusTypes().order;
     let thisStatus = statusList[statusList.findIndex(x=>x.status===letter.letterStatus)];
     /* let actorCan = thisStatus.whoCan.filter(x=> props.actor in x);
 

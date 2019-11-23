@@ -56,18 +56,21 @@ const useStyles = makeStyles(theme => ({
 export default function TabBar(props) {
   const classes = useStyles();
   const [selectedTab, setSelectedTab] = React.useState(0);
-  var items = (!props.items || !Array.isArray(props.items)) ? []: props.items;
+  var items = ((!props.items || !Array.isArray(props.items)) ? []: props.items)
+  .filter(x=>(!!x.data))
+  .filter(x=>(!!x.data.description));
   function handleChange(event, newValue) {
     setSelectedTab(newValue);
+    console.log("Refreshed tabs: " + items)
   }
-
+  console.log("Initial tabs: " + JSON.stringify(items, null, 2))
   return (
     <Paper square className={classes.root}>
       <AppBar className={classes.appbar} position="static" >
         <Tabs centered forceRenderTabPanel={true} value={selectedTab} onChange={handleChange} aria-label="simple tabs example">
         <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} icon={<Announcement />} />
         {items.map((l, index) =>
-                <Tab label={l.letterDescription} {...a11yProps(index+1)} key={"tabtop"+l.letterId} icon={<InsertDriveFile />} />
+                <Tab label={l.data.description} {...a11yProps(index+1)} key={"tabtop"+l.id} icon={<InsertDriveFile />} />
             )}
             <Tab label='Create' {...a11yProps(items.length+1)} key={"tabtop-create"} icon={<NoteAdd />} />
         </Tabs>
@@ -76,7 +79,7 @@ export default function TabBar(props) {
           <WelcomeLetterPanel config={props.config} />
       </TabPanel>
       {items.map((l, index) => 
-           <TabPanel value={selectedTab} index={index+1} key={'tabpanel-'+l.letterId}>
+           <TabPanel value={selectedTab} index={index+1} key={'tabpanel-'+l.id}>
              <SingleOrder key={'singleorder-'+l.id} config={props.config} id={l.id} 
               />
             </TabPanel>

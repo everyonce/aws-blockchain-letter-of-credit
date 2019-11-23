@@ -16,7 +16,7 @@ export default class App extends Component {
     this.props=props;
   }
   
-  updateHooks= []
+  updateHooks= [];
 
   addUpdateHook = (itemId, updateFunc) => { 
     this.updateHooks = this.updateHooks.filter(x => x.itemId !== itemId)
@@ -62,12 +62,14 @@ export default class App extends Component {
         this.setState({
           items: result.data,
           isLoading: false })
-        ) 
-      .catch(error => this.setState({ error: error, isLoading: false })); 
+        )
+        .catch(error => this.setState({ error: error, isLoading: false })); 
+      
   }
 
   componentDidMount = () => {
     this.updateItems();
+    console.log("Refreshed orders: " + this.state.items);
   }
 
   render() {

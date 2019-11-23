@@ -5,29 +5,18 @@ import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
 import NetworkConstants from './NetworkConstants';
-import SampleLetters from './WelcomeLetterPanel_SampleLetters';
+import SampleData from './WelcomeLetterPanel_SampleOrders';
 
 export default function CreateWelcomePage(props) {
     const networkConstants = NetworkConstants();
-    const [deleting, setDeleting] = React.useState(false);
     const [creating, setCreating] = React.useState(false);
-    let deleteAll=(values) => {
-      setDeleting(true);
-      axios.get(props.config.apiUrl + '/deleteAllLetters'
-       ).then((resp) => {
-        setDeleting(false);
-        //alert("done deleting: " + util.inspect(resp));
-       }
-       );
-     };
      let createAll=(values) => {
       setCreating(true);
-      let newLetters = SampleLetters(networkConstants.MemberId);
-      newLetters.forEach(newLetter => {
-        axios.post(props.config.apiUrl + '/createLetter', newLetter
+      let newItems = SampleData(networkConstants.MemberId);
+      newItems.forEach(item => {
+        axios.post(props.config.apiUrl + '/order/create', item
         ).then((resp) => {
           setCreating(false);
-          //alert("done creating: " + util.inspect(resp));
         }
         );
       })
@@ -57,8 +46,7 @@ export default function CreateWelcomePage(props) {
                     <Button
                       type="button"
                       className="outline"
-                      onClick={deleteAll}
-                      disabled={deleting}
+                      disabled={true}
                     >
                       Delete All Orders
                     </Button>

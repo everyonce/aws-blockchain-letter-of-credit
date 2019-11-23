@@ -4,22 +4,24 @@ import Typography from '@material-ui/core/Typography';
 import OI from 'react-object-inspector';
 import './LetterDetailBlock.css';
 import StatusChain from './StatusChain';
-import getStatusTypes from './LetterStatusTypes';
+import getStatusTypes from './StatusTypes';
 import ShowActor from './ShowActor';
+import OrderFulfillment from './OrderFulfillment';
+import OrderShipments from './OrderShipments';
 import axios from 'axios';
 
-const fetchLetter = async (id, apiUrl) => {
+const fetchOrder = async (id, apiUrl) => {
   const response = await axios.get(apiUrl + '/order/' + id);
   return response.data;
 };
 
 export default function SingleOrder(props) {
-    const statusList = getStatusTypes();
+    const statusList = getStatusTypes().order;
     const [item, setItem] = React.useState();
     
     React.useEffect(() => {
       if(!item) {
-        fetchLetter(props.id,props.config.apiUrl).then(result=>setItem(result));
+        fetchOrder(props.id,props.config.apiUrl).then(result=>setItem(result));
       }
     }, [props.id,props.config.apiUrl,item]);
 
@@ -32,7 +34,7 @@ export default function SingleOrder(props) {
 
     props.config.addUpdateHook(
       props.id, 
-      () => fetchLetter(props.id, props.config.apiUrl).then(result=>setItem(result))
+      () => fetchOrder(props.id, props.config.apiUrl).then(result=>setItem(result))
     );
 
     return (
@@ -45,15 +47,26 @@ export default function SingleOrder(props) {
 >
   <Grid  container item alignItems="center" justify="center" direction="column">
     <Grid item>
-  <StatusChain statusList={statusList} letter={item} letterId={props.letterId} />
-  </Grid>
-  <Grid item>
-    <Typography  variant="h4" component="h4" gutterBottom style={{textAlign:"center"}}>
-        Next Step:<br/>
+      <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"left"}}>
+      {item.data.description} [{item.id}]
+      </Typography>
+      <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"left"}}>
+          Current Status:{ item.status}
+      </Typography>
+    </Grid>
+    <Grid  container item alignItems="center" justify="center" direction="column">
+      <Grid item>
+        <Typography  variant="h5" component="h5" gutterBottom style={{textAlign:"left"}}>
+          Fulfillment
         </Typography>
-        <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"center"}}>
-        {"No description" || statusList[statusList.findIndex(x=>x.status===item.status)].desc||"No description"}
-    </Typography>
+        <OrderFulfillment order={item} />
+      </Grid>
+      <Grid item>
+        <Typography  variant="h5" component="h5" gutterBottom style={{textAlign:"left"}}>
+          Shipments
+        </Typography>
+        <OrderShipments order={item} />
+      </Grid>
     </Grid>
   </Grid>   
   <Grid
