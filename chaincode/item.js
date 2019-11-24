@@ -210,7 +210,7 @@ async queryHistoryForKey(stub, args) {
   }
 }
   
-async deleteAll(stub) {
+async deleteAll(stub, args) {
   //var logger = shim.NewLogger("myChaincode")
   try {
     console.log('============= START : rmrf ===========');
@@ -218,7 +218,9 @@ async deleteAll(stub) {
     while (true) {
       const res = await iterator.next();
       console.log('##### RMRF: ' + util.inspect(res));
-      await stub.deleteState(res.value.key);
+      if (res.value && res.value.key) {
+         await stub.deleteState(res.value.key);
+      }
       if (res.done) {
         console.log('end of data - closing iterator');
         var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));
