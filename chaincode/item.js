@@ -55,11 +55,35 @@ async create(stub, args) {
     let Key = item.docType+'.'+item.id;
     item.status= 'NEW';
     item.history=[];
+    var caller = stub.getCreator();
+
     //verify each entity only has one role
     
     var eventMessage=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"CREATE","caller":stub.getCreator().mspid,"newStatus":item.status}));
+
     stub.setEvent("itemAction",eventMessage);
     await stub.putState(Key, Buffer.from(JSON.stringify(item)));
+
+    // if it's a shipment, add a reference within the relevant orders
+    if (item.docType=='SHIPMENT') {
+      const uniqueOrderIds = [...new Set(item.data.shipmentItems.map(item => item.orderId))];
+      uniqueOrderIds.forEach(orderId => {
+        //add this shipment to the order shipment list
+        let orderKey = 'ORDER.'+orderId;
+        let orderBytes = await stub.getState(orderKey);
+        if (!orderBytes || orderBytes.length==0) {
+          throw new Error("couldn't find "+orderKey);
+        }
+        let order = JSON.parse(orderBytes.toString());
+        var historyEntry = {"result":"SUCCESS","action":"update","caller":caller.mspid,"newStatus":order.status};
+        order.history.push(historyEntry);
+        if (!order.data.shipments)
+          order.data.shipments = [];
+        order.data.shipments.push(item.id);
+        await stub.putState(orderKey, Buffer.from(JSON.stringify(order)));
+      });
+      
+    }
   } catch(error) {
     throw new Error(error);
   }
@@ -196,10 +220,8 @@ async deleteAll(stub) {
       console.log('##### RMRF: ' + util.inspect(res));
       let jsonRes = {};
       jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-      if (jsonRes.Record.docType == 'letter') {
-        console.log('##### DELETING: ' + util.inspect(res.value.key));
-        await stub.deleteState(res.value.key);
-      }
+      console.log('##### DELETING: ' + util.inspect(res.value.key));
+      await stub.deleteState(res.value.key);
       if (res.done) {
         console.log('end of data - closing iterator');
         var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));

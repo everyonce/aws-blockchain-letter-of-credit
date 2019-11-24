@@ -14,7 +14,7 @@ export default function CreateWelcomePage(props) {
       setCreating(true);
       let newItems = SampleData(networkConstants.MemberId);
       newItems.forEach(item => {
-        axios.post(props.config.apiUrl + '/order/create', item
+        axios.post(props.config.apiUrl + '/'+ item.docType.toLowerCase() + '/create', item
         ).then((resp) => {
           setCreating(false);
         }
