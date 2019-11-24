@@ -67,7 +67,7 @@ async create(stub, args) {
     // if it's a shipment, add a reference within the relevant orders
     if (item.docType=='SHIPMENT') {
       const uniqueOrderIds = [...new Set(item.data.shipmentItems.map(item => item.orderId))];
-      uniqueOrderIds.forEach(orderId => {
+      uniqueOrderIds.forEach(async orderId =>  {
         //add this shipment to the order shipment list
         let orderKey = 'ORDER.'+orderId;
         let orderBytes = await stub.getState(orderKey);
@@ -218,15 +218,11 @@ async deleteAll(stub) {
     while (true) {
       const res = await iterator.next();
       console.log('##### RMRF: ' + util.inspect(res));
-      let jsonRes = {};
-      jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
-      console.log('##### DELETING: ' + util.inspect(res.value.key));
       await stub.deleteState(res.value.key);
       if (res.done) {
         console.log('end of data - closing iterator');
         var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));
-        stub.setEvent("letterAction",resultAsBytes);  
-
+        stub.setEvent("action",resultAsBytes);  
         await iterator.close();
         return;
       }
