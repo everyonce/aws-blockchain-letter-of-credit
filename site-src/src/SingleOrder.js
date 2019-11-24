@@ -12,7 +12,12 @@ import axios from 'axios';
 
 const fetchOrder = async (id, apiUrl) => {
   const response = await axios.get(apiUrl + '/order/' + id);
-  return response.data;
+  let order = response.data;
+  if (!order.data.lineItems)
+    order.data.lineItems = [];
+  if (!order.data.shipments)
+    order.data.shipments = [];
+  return order;
 };
 
 export default function SingleOrder(props) {

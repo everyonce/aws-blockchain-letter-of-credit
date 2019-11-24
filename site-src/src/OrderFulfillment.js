@@ -42,12 +42,13 @@ export default function OrderFulfillment(props) {
             )
           }
         )
+        rows.push(newRow);
        }
     )
 
     return(
-        <Paper className={useStyles.root}>
-        <Table className={useStyles.table} aria-label="simple table">
+        <Paper className={useStyles.root} width="100%">
+        <Table className={useStyles.table} aria-label="simple table" width="100%">
           <TableHead>
             <TableRow>
               <TableCell>Item</TableCell>

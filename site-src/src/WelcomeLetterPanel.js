@@ -21,6 +21,15 @@ export default function CreateWelcomePage(props) {
         );
       })
      };
+     const [deleting, setDeleting] = React.useState(false);
+     let deleteAll=(values) => {
+      setDeleting(true);
+      axios.post(props.config.apiUrl + '/deleteAll', {}
+        ).then((resp) => {
+          setDeleting(false);
+        }
+        );
+     };
         return (
             <Container maxWidth="sm">
             <Typography variant="h4" gutterBottom>
@@ -46,7 +55,8 @@ export default function CreateWelcomePage(props) {
                     <Button
                       type="button"
                       className="outline"
-                      disabled={true}
+                      disabled={deleting}
+                      onClick={deleteAll}
                     >
                       Delete All Orders
                     </Button>

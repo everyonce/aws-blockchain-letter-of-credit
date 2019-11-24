@@ -233,6 +233,7 @@ func (s *serverType) RegisterHTTPHandlers() {
 	s.router.HandleFunc("/shipment/create", s.httpCreateShipment)
 	s.router.HandleFunc("/shipment/update", s.httpUpdateShipment)
 	s.router.HandleFunc("/shipment/get/{shipmentId}", s.httpShipmentDetail)
+	s.router.HandleFunc("/deleteAll", s.httpDeleteAll)
 	s.router.HandleFunc("/ws", serveWs)
 	s.router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
 	s.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./site/")))
@@ -356,6 +357,16 @@ func (s *serverType) httpListItems(w http.ResponseWriter, r *http.Request) {
 func (s *serverType) httpItemDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	runCC(w, r, "query", "get", convertArgs([]string{"ITEM." + vars["itemId"]}))
+}
+
+func (s *serverType) httpDeleteAll(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Error reading body: %v", err)
+		http.Error(w, "can't read body", http.StatusBadRequest)
+		return
+	}
+	runCC(w, r, "invoke", "deleteAll", [][]byte{body})
 }
 
 func runCC(w http.ResponseWriter, r *http.Request, method string, functionName string, args [][]byte) {

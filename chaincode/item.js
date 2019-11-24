@@ -186,5 +186,33 @@ async queryHistoryForKey(stub, args) {
   }
 }
   
+async deleteAll(stub) {
+  //var logger = shim.NewLogger("myChaincode")
+  try {
+    console.log('============= START : rmrf ===========');
+    let iterator = await stub.getStateByRange('', '');
+    while (true) {
+      const res = await iterator.next();
+      console.log('##### RMRF: ' + util.inspect(res));
+      let jsonRes = {};
+      jsonRes.Record = JSON.parse(res.value.value.toString('utf8'));
+      if (jsonRes.Record.docType == 'letter') {
+        console.log('##### DELETING: ' + util.inspect(res.value.key));
+        await stub.deleteState(res.value.key);
+      }
+      if (res.done) {
+        console.log('end of data - closing iterator');
+        var resultAsBytes=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"DELETE","caller":stub.getCreator().mspid}));
+        stub.setEvent("letterAction",resultAsBytes);  
+
+        await iterator.close();
+        return;
+      }
+    }
+  } catch(error) {
+    throw new Error(error);
+  }
+}
+
 }
 shim.start(new Chaincode());
