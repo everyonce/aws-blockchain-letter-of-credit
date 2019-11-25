@@ -60,7 +60,7 @@ export default function SampleData(memberId) {
       "docType":"SHIPMENT",
       "data":{
         
-        shipmentItems:[
+        "shipmentItems":[
           {
             "orderId":id1,
             "sku": "iPhone6S_Battery",

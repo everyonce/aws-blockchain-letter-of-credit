@@ -49,7 +49,15 @@ console.log('============= START : Initialize Ledger ===========');
 console.log('============= END : Initialize Ledger ===========');
 }
 
+
+
 async create(stub, args) {
+  let log = [];
+  let asyncForEach = async (array, log, callback) => {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array, log);
+    }
+  }
   try {
     let item = JSON.parse(args[0]);
     let Key = item.docType+'.'+item.id;
@@ -63,29 +71,44 @@ async create(stub, args) {
 
     stub.setEvent("itemAction",eventMessage);
     await stub.putState(Key, Buffer.from(JSON.stringify(item)));
-
+    log.push("Updated state for key: "+Key);
     // if it's a shipment, add a reference within the relevant orders
     if (item.docType=='SHIPMENT') {
       const uniqueOrderIds = [...new Set(item.data.shipmentItems.map(item => item.orderId))];
-      uniqueOrderIds.forEach(async orderId =>  {
+      log.push("This is a shipment, it has "+ uniqueOrderIds.length + " unique orders.");
+
+      await asyncForEach(uniqueOrderIds, log, async (orderId, index, array, log) =>  {
         //add this shipment to the order shipment list
         let orderKey = 'ORDER.'+orderId;
+        log.push("Looking at order: "+orderKey);
         let orderBytes = await stub.getState(orderKey);
-        if (!orderBytes || orderBytes.length==0) {
-          throw new Error("couldn't find "+orderKey);
-        }
-        let order = JSON.parse(orderBytes.toString());
-        var historyEntry = {"result":"SUCCESS","action":"update","caller":caller.mspid,"newStatus":order.status};
-        order.history.push(historyEntry);
-        if (!order.data.shipments)
-          order.data.shipments = [];
-        order.data.shipments.push(item.id);
-        await stub.putState(orderKey, Buffer.from(JSON.stringify(order)));
+        log.push("Got order bytes: "+orderBytes.toString("utf-8"));
+          if (!orderBytes || orderBytes.length==0) {
+            log.push("Looks like orderBytes is empty for orderid: "+orderId);
+            throw new Error("couldn't find "+orderKey);
+          }
+          try {
+            let order = JSON.parse(orderBytes.toString());
+            log.push("order is parsed: "+order);
+            var historyEntry = {"result":"SUCCESS","action":"update","caller":caller.mspid,"newStatus":order.status};
+            order.history.push(historyEntry);
+            if (!order.data.shipments) {
+              log.push("adding empty shipments array");
+              order.data.shipments = [];
+            }
+            order.data.shipments.push(item.id);
+            log.push("pushed item id to shipments:" + item.id);
+            await stub.putState(orderKey, Buffer.from(JSON.stringify(order)));
+            log.push("updated state for key:" + orderKey)
+            
+          } catch(error) {
+            throw new Error("Error updating order " + orderId +":" + error + " ## ORDERBYTES: "+ orderBytes.toString() + " LOG:" + JSON.stringify(log));
+          }
       });
-      
+      return Buffer.from(JSON.stringify(log));
     }
   } catch(error) {
-    throw new Error(error);
+    throw new Error(error + " LOG:" + JSON.stringify(log));
   }
 }
 async get(stub, args) {

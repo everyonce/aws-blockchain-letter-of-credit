@@ -74,34 +74,6 @@ export default function SingleOrder(props) {
       </Grid>
     </Grid>
   </Grid>   
-  <Grid
-    item
-    container
-    sm={8}
-    spacing={2}
-    alignItems="flex-start"
-    justify="center"
-    >
-    {[      {actor:"Manufacturer", icon:"factory"},
-            {actor:"Logistics", icon:"truck"},
-            {actor:"Warehouse", icon:"warehouse"},
-            {actor:"RepairShop", icon:"person"},
-        ].map(x => 
-            <Grid item xs={6} sm={3} justify="center">
-                <ShowActor config={props.config} actor={x.actor} icon={x.icon} letter={item} />
-            </Grid> )}
-    </Grid>
-    <Grid item>
-    <Typography gutterBottom>
-        {props.letterId} <br />
-          Status: {item.letterStatus} <br />
-          {(item.productDetails)?item.productDetails.map((x) => 
-                  <OI key={"product"+x.productSku} data={x} name={x.productSku}/>
-                  ):'Cannot load, retry'
-                  }
-
-</Typography>
-    </Grid>
 </Grid>
   
   )
