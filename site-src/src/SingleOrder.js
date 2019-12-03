@@ -10,37 +10,31 @@ import OrderFulfillment from './OrderFulfillment';
 import OrderShipments from './OrderShipments';
 import axios from 'axios';
 
-const fetchOrder = async (id, apiUrl) => {
-  const response = await axios.get(apiUrl + '/order/' + id);
-  let order = response.data;
-  if (!order.data.lineItems)
-    order.data.lineItems = [];
-  if (!order.data.shipments)
-    order.data.shipments = [];
-  return order;
-};
+
 
 export default function SingleOrder(props) {
     const statusList = getStatusTypes().order;
-    const [item, setItem] = React.useState();
+    //const [item, setItem] = React.useState();
     
-    React.useEffect(() => {
+    /*React.useEffect(() => {
       if(!item) {
-        fetchOrder(props.id,props.config.apiUrl).then(result=>setItem(result));
+        //fetchOrder(props.id,props.config.apiUrl).then(result=>setItem(result));
       }
     }, [props.id,props.config.apiUrl,item]);
-
-
-    if (!item )  {
+*/
+    let orderShipments = props.shipments.filter(
+      shipment => (props.order.data.shipments || []).includes(shipment.id)
+    )
+    if (!props.order )  {
       return (
         <h1>Loading</h1>
       );
     }
 
-    props.config.addUpdateHook(
+    /*props.config.addUpdateHook(
       props.id, 
       () => fetchOrder(props.id, props.config.apiUrl).then(result=>setItem(result))
-    );
+    );*/
 
     return (
 <Grid
@@ -51,26 +45,21 @@ export default function SingleOrder(props) {
   direction="column"
 >
   <Grid  container item alignItems="center" justify="center" direction="column">
-    <Grid item>
+    <Grid item width={1}>
       <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"left"}}>
-      {item.data.description} [{item.id}]
+      {props.order.data.description} [{props.order.id}]
       </Typography>
       <Typography  variant="h6" component="h6" gutterBottom style={{textAlign:"left"}}>
-          Current Status:{ item.status}
+          Current Status:{ props.order.status}
       </Typography>
     </Grid>
-    <Grid  container item alignItems="center" justify="center" direction="column">
-      <Grid item>
-        <Typography  variant="h5" component="h5" gutterBottom style={{textAlign:"left"}}>
-          Fulfillment
-        </Typography>
-        <OrderFulfillment order={item} />
+    <Grid  container item alignItems="stretch" justify="center" direction="column" width={1}>
+      <Grid item padding="5" width={1} align="stretch">
+        <OrderFulfillment config={props.config} order={props.order} shipments={orderShipments} />
       </Grid>
-      <Grid item>
-        <Typography  variant="h5" component="h5" gutterBottom style={{textAlign:"left"}}>
-          Shipments
-        </Typography>
-        <OrderShipments order={item} />
+      <br />
+      <Grid item padding="5" width={1} align="stretch">
+        <OrderShipments order={props.order} shipments={orderShipments} />
       </Grid>
     </Grid>
   </Grid>   

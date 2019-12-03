@@ -10,14 +10,14 @@ import getStatusTypes from './StatusTypes';
 import ShowActor from './ShowActor';
 import axios from 'axios';
 
-const fetchOrder = async (id, apiUrl) => {
-  const response = await axios.get(apiUrl + '/order/' + id);
+const fetchShipment = async (id, apiUrl) => {
+  const response = await axios.get(apiUrl + '/shipment/get/' + id);
   return response.data;
 };
 
 const useStyles = makeStyles(theme => ({
     root: {
-      flexGrow: 1,
+      flexGrow: 0,
       backgroundColor: theme.palette.background.paper,
     },
     appbar: {
@@ -28,15 +28,17 @@ export default function OrderFulfillment(props) {
     let rows = [];
     props.order.data.lineItems.forEach(
        lineItem => {
-        let newRow ={};
-        newRow.ordered=1;
+        let newRow = lineItem;
         newRow.fulfilled=0;
-        props.order.data.shipments.forEach(
-          shipment => {
-            shipment.shipmentItems.filter(x=>x.sku==lineItem.sku).forEach(
+        console.log("about to loop shipments: " + props.shipments.length);
+        (props.shipments || []).forEach(
+          async shipment => {
+            console.log("looping shipments: " + shipment);
+            shipment.data.shipmentItems.filter(x=>x.sku==lineItem.sku).forEach(
               shipmentItem => {
+                console.log("looping shipmentItem: " + shipmentItem);
                 if (shipment.status=="DELIVERED") {
-                  newRow.fulfilled += shipmentItem.quantity;
+                  newRow.fulfilled += parseInt(shipmentItem.quantity);
                 }
               }
             )
@@ -47,8 +49,11 @@ export default function OrderFulfillment(props) {
     )
 
     return(
-        <Paper className={useStyles.root} width="100%">
-        <Table className={useStyles.table} aria-label="simple table" width="100%">
+        <Paper className={useStyles.root} width={1}>
+                  <Typography  variant="h5" component="h5" gutterBottom style={{textAlign:"left"}}>
+          Fulfillment
+        </Typography>
+        <Table className={useStyles.table} aria-label="simple table" width={1}>
           <TableHead>
             <TableRow>
               <TableCell>Item</TableCell>
@@ -62,12 +67,12 @@ export default function OrderFulfillment(props) {
             {rows.map(row => (
               <TableRow key={row.name}>
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  {row.sku}
                 </TableCell>
-                <TableCell align="right">{row.calories}</TableCell>
-                <TableCell align="right">{row.fat}</TableCell>
-                <TableCell align="right">{row.carbs}</TableCell>
-                <TableCell align="right">{row.protein}</TableCell>
+                <TableCell align="right">{row.quantity}</TableCell>
+                <TableCell align="right">{row.fulfilled}</TableCell>
+                <TableCell align="right">{row.costPer} per {row.quantity_unit}</TableCell>
+                <TableCell align="right">{row.totalCost}</TableCell>
               </TableRow>
             ))}
           </TableBody>

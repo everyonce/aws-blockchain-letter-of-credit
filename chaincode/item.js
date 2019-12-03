@@ -61,10 +61,12 @@ async create(stub, args) {
   try {
     let item = JSON.parse(args[0]);
     let Key = item.docType+'.'+item.id;
-    item.status= 'NEW';
-    item.history=[];
     var caller = stub.getCreator();
 
+    item.status= 'NEW';
+    item.history=[];
+    var historyEntry = {"result":"SUCCESS","action":"CREATE","caller":caller.mspid,"newStatus":"NEW"};
+    item.history.push(historyEntry);
     //verify each entity only has one role
     
     var eventMessage=Buffer.from(JSON.stringify({"result":"SUCCESS","action":"CREATE","caller":stub.getCreator().mspid,"newStatus":item.status}));

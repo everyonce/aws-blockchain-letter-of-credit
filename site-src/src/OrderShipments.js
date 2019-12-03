@@ -1,23 +1,12 @@
 import React from 'react';
 import {Paper, Table, TableHead, TableRow, TableCell, TableBody} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import OI from 'react-object-inspector';
-import './LetterDetailBlock.css';
 import StatusChain from './StatusChain';
-import getStatusTypes from './StatusTypes';
-import ShowActor from './ShowActor';
-import axios from 'axios';
 
-const fetchOrder = async (id, apiUrl) => {
-  const response = await axios.get(apiUrl + '/order/' + id);
-  return response.data;
-};
 const useStyles = makeStyles(theme => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 0,
     backgroundColor: theme.palette.background.paper,
   },
   appbar: {
@@ -25,30 +14,12 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 export default function OrderShipments(props) {
-  let rows = [];
-  props.order.data.shipments.forEach(
-     shipment => {
-      let newRow ={};
-      newRow.id=shipment.id;
-      //newRow.fulfilled=0;
-      /* props.order.data.shipments.forEach(
-        shipment => {
-          shipment.shipmentItems.filter(x=>x.sku==lineItem.sku).forEach(
-            shipmentItem => {
-              if (shipment.status=="DELIVERED") {
-                newRow.fulfilled += shipmentItem.quantity;
-              }
-            }
-          )
-        }
-      ) */
-      rows.push(newRow);
-     }
-  )
-
   return(
-      <Paper className={useStyles.root} width="100%">
-      <Table className={useStyles.table} aria-label="simple table" width="100%">
+      <Paper className={useStyles.root} width={1}>
+         <Typography  variant="h5" component="h5" gutterBottom style={{textAlign:"left"}}>
+          Shipments ({props.shipments.length})
+        </Typography>
+      <Table className={useStyles.table} aria-label="simple table" width={1}>
         <TableHead>
           <TableRow>
             <TableCell>Shipment</TableCell>
@@ -56,17 +27,17 @@ export default function OrderShipments(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => 
-          <React.Fragment>
-            <TableRow key={row.name}>
+          {props.shipments.map(row => 
+          <React.Fragment width={1}>
+            <TableRow key={row.id}>
               <TableCell scope="row">
-                {row.name}
+                {row.id}
               </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
+              <TableCell align="right">{row.status}</TableCell>
             </TableRow>
             <TableRow key={row.name}>
-              <TableCell scope="row" rowSpan="2">
-                SHOW CHAIN OF UPDATES
+              <TableCell scope="row" colSpan="2">
+                <StatusChain history={row.history} />
               </TableCell>
             </TableRow>
             </React.Fragment>

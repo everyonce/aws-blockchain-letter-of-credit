@@ -11,7 +11,7 @@ export default class App extends Component {
     super(props);
     this.state = {
       title:"Blockchain Dashboard",
-      isLoading: false, items: [], error: null 
+      isLoadingOrders: false, orders: [], isLoadingShipments: false, shipments: [], error: null 
     };
     this.props=props;
   }
@@ -55,30 +55,41 @@ export default class App extends Component {
     }
   }
 
-  updateItems = () => {
-    this.setState({ isLoading: true, items: [], error: null });
+  updateOrders = async () => {
+    this.setState({ isLoadingOrders: true, orders: [], error: null });
     axios.get(this.config.apiUrl + '/order/list')
       .then(result => 
         this.setState({
-          items: result.data,
-          isLoading: false })
+          orders: result.data,
+          isLoadingOrders: false })
         )
-        .catch(error => this.setState({ error: error, isLoading: false })); 
-      
+        .catch(error => this.setState({ error: error, isLoadingOrders: false })); 
+  }
+
+  updateShipments = async () => {
+    this.setState({ isLoadingShipments: true, shipments: [], error: null });
+    axios.get(this.config.apiUrl + '/shipment/list')
+      .then(result => 
+        this.setState({
+          shipments: result.data,
+          isLoadingShipments: false })
+        )
+        .catch(error => this.setState({ error: error, isLoadingShipments: false })); 
   }
 
   componentDidMount = () => {
-    this.updateItems();
-    console.log("Refreshed orders: " + this.state.items);
+    this.updateOrders();
+    this.updateShipments();
+    console.log("Refreshed orders: " + this.state.orders);
   }
 
   render() {
-    if (this.state.isLoading) return (<div>LOADING</div>);
+    if (this.state.isLoadingOrders || this.state.isLoadingShipments) return (<div>LOADING</div>);
     if (this.state.error) return (<div>{util.inspect(this.state.error)}</div>);
     return (
       <React.Fragment>      
         <Websocket url={this.config.wsUrl} onMessage={(event) => this.wsEvent(event)} />
-        <TabBar items={this.state.items} config={this.config} />
+        <TabBar orders={this.state.orders}  shipments={this.state.shipments} config={this.config} />
       </React.Fragment>
     );
   }
