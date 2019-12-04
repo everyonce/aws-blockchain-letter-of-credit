@@ -173,6 +173,8 @@ async update(stub, args) {
     var response = {"result":"SUCCESS","action":"update","caller":caller.mspid,"newStatus":item.status};
     origItem.history.push(response);
     item.history=origItem.history;
+    if (!item.data) { item.data=origItem.data; }
+    
     response.updatedKey=key;
     response.item=item.id;
     response.docType=item.docType;
@@ -185,6 +187,8 @@ async update(stub, args) {
     throw new Error(error);
   }
 } 
+
+
 
 /**
  * Retrieves the Fabric block and transaction details for a key or an array of keys
