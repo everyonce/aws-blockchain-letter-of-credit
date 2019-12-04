@@ -11,15 +11,12 @@ export default function CreateWelcomePage(props) {
     const networkConstants = NetworkConstants();
     const [creating, setCreating] = React.useState(false);
      let createAll=(values) => {
-      setCreating(true);
       let newItems = SampleData(networkConstants.MemberId);
-      newItems.forEach(item => {
-        axios.post(props.config.apiUrl + '/'+ item.docType.toLowerCase() + '/create', item
-        ).then((resp) => {
-          setCreating(false);
-        }
-        );
-      })
+      
+      newItems.reduce((promiseChain, item) =>
+        promiseChain.then(() => 
+          {console.log("setcreating true"); setCreating(true); return axios.post(props.config.apiUrl + '/'+ item.docType.toLowerCase() + '/create', item);}), Promise.resolve())
+      .then(() => {console.log("setcreating false"); setCreating(false);});
      };
      const [deleting, setDeleting] = React.useState(false);
      let deleteAll=(values) => {

@@ -22,7 +22,8 @@ export default function OrderShipments(props) {
       <Table className={useStyles.table} aria-label="simple table" width={1}>
         <TableHead>
           <TableRow>
-            <TableCell>Shipment</TableCell>
+            <TableCell align="left">Shipment</TableCell>
+            <TableCell style={{ width: "50%" }}>Updates</TableCell>
             <TableCell align="right">Status</TableCell>
           </TableRow>
         </TableHead>
@@ -30,15 +31,13 @@ export default function OrderShipments(props) {
           {props.shipments.map(row => 
           <React.Fragment width={1}>
             <TableRow key={row.id}>
-              <TableCell scope="row">
+              <TableCell scope="row"  align="left">
                 {row.id}
               </TableCell>
-              <TableCell align="right">{row.status}</TableCell>
-            </TableRow>
-            <TableRow key={row.name}>
-              <TableCell scope="row" colSpan="2">
+              <TableCell scope="row">
                 <StatusChain history={row.history} />
               </TableCell>
+              <TableCell align="right">{row.status}</TableCell>
             </TableRow>
             </React.Fragment>
           )}

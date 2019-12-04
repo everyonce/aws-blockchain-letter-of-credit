@@ -30,6 +30,7 @@ export default function OrderFulfillment(props) {
        lineItem => {
         let newRow = lineItem;
         newRow.fulfilled=0;
+        newRow.shipped=0;
         console.log("about to loop shipments: " + props.shipments.length);
         (props.shipments || []).forEach(
           async shipment => {
@@ -37,6 +38,7 @@ export default function OrderFulfillment(props) {
             shipment.data.shipmentItems.filter(x=>x.sku==lineItem.sku).forEach(
               shipmentItem => {
                 console.log("looping shipmentItem: " + shipmentItem);
+                newRow.shipped += parseInt(shipmentItem.quantity);
                 if (shipment.status=="DELIVERED") {
                   newRow.fulfilled += parseInt(shipmentItem.quantity);
                 }
@@ -58,6 +60,7 @@ export default function OrderFulfillment(props) {
             <TableRow>
               <TableCell>Item</TableCell>
               <TableCell align="right">Ordered</TableCell>
+              <TableCell align="right">Shipped</TableCell>
               <TableCell align="right">Fulfilled</TableCell>
               <TableCell align="right">CostPer</TableCell>
               <TableCell align="right">CostOrder</TableCell>
@@ -70,6 +73,7 @@ export default function OrderFulfillment(props) {
                   {row.sku}
                 </TableCell>
                 <TableCell align="right">{row.quantity}</TableCell>
+                <TableCell align="right">{row.shipped}</TableCell>
                 <TableCell align="right">{row.fulfilled}</TableCell>
                 <TableCell align="right">{row.costPer} per {row.quantity_unit}</TableCell>
                 <TableCell align="right">{row.totalCost}</TableCell>

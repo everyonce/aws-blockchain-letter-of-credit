@@ -15,13 +15,13 @@ return (
                     else if (i>p) 
                         {c={topfill:'#DDDDDD',rightfill:'#AAAAAA',leftfill:'#858585'}} */
                 if (i>0) {
-                    link=(<ChainLink height={22} width={22} style={{padding: '10px'}} />)
+                    link=(<ChainLink height={10} width={10} style={{padding: '5px'}} />)
                     }
                 return (<React.Fragment>
                     {link}
-                    <Tooltip disableFocusListener title={x.status}>
+                    <Tooltip disableFocusListener title={x.newStatus}>
                         <div>
-                            <CubeIcon  fills={c}/>
+                            <CubeIcon  height={30} width={30} fills={c}/>
                         </div>
                     </Tooltip>
                     </React.Fragment>);
