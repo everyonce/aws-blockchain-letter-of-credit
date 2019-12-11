@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
+import {AppBar,Drawer,Divider,List,ListItem,ListItemText} from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
@@ -42,7 +42,7 @@ function a11yProps(index) {
     'aria-controls': `simple-tabpanel-${index}`,
   };
 }
-
+const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -50,7 +50,22 @@ const useStyles = makeStyles(theme => ({
   },
   appbar: {
     backgroundColor: '#005A95'
-  }
+  },
+  tab: {
+    justifyContent: "left"
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    marginLeft: drawerWidth,
+  },
 }));
 
 export default function TabBar(props) {
@@ -61,20 +76,31 @@ export default function TabBar(props) {
   .filter(x=>(!!x.data.description));
   function handleChange(event, newValue) {
     setSelectedTab(newValue);
-    console.log("Refreshed tabs: " + orders)
+    //console.log("Refreshed tabs: " + orders)
   }
-  console.log("Initial tabs: " + JSON.stringify(orders, null, 2))
+  //console.log("Initial tabs: " + JSON.stringify(orders, null, 2))
   return (
     <Paper square className={classes.root}>
-      <AppBar className={classes.appbar} position="static" >
-        <Tabs centered forceRenderTabPanel={true} value={selectedTab} onChange={handleChange} aria-label="simple tabs example">
-          <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} icon={<Announcement />} />
+      <Drawer
+        className={classes.drawer}
+        variant="permanent"
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+        anchor="left"
+      >
+
+        <Tabs  orientation="vertical" forceRenderTabPanel={true} value={selectedTab} onChange={handleChange} aria-label="simple tabs example">
+          <Tab label='Welcome' {...a11yProps(0)} key={"tabtop-welcome"} >
+            <div><h3>test welcome</h3></div>
+            </Tab>
             {orders.map((l, index) =>
-              <Tab label={l.data.description} {...a11yProps(index+1)} key={"tabtop"+l.id} icon={<InsertDriveFile />} />
+              <Tab label={l.data.description} {...a11yProps(index+1)} key={"tabtop"+l.id}/>
             )}
-          <Tab label='Create' {...a11yProps(orders.length+1)} key={"tabtop-create"} icon={<NoteAdd />} />
+          <Tab label='Create' {...a11yProps(orders.length+1)} key={"tabtop-create"} />
         </Tabs>
-      </AppBar>
+      </Drawer>
+      <div className={classes.content}>
       <TabPanel value={selectedTab} index={0} key='welcome-letter-tab-panel' >
           <WelcomeLetterPanel config={props.config} />
       </TabPanel>
@@ -86,6 +112,7 @@ export default function TabBar(props) {
         <TabPanel value={selectedTab} index={orders.length+1} key='create-letter-tab-panel' >
             <CreateLetterPanel config={props.config} />
         </TabPanel>
+        </div>
     </Paper>
   );
 }

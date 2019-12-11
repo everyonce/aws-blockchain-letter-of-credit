@@ -11,7 +11,8 @@ export default class App extends Component {
     super(props);
     this.state = {
       title:"Blockchain Dashboard",
-      isLoadingOrders: false, orders: [], isLoadingShipments: false, shipments: [], error: null 
+      isLoadingOrders: false, orders: [], error: null,
+      bulkChanging: false
     };
     this.props=props;
   }
@@ -19,38 +20,48 @@ export default class App extends Component {
   updateHooks= [];
 
   addUpdateHook = (itemId, updateFunc) => { 
+    console.log("adding hook for "+itemId);
     this.updateHooks = this.updateHooks.filter(x => x.itemId !== itemId)
     this.updateHooks.push({itemId: itemId, updateFunc: updateFunc});
+    //updateFunc(this.shipments);
   }
-
+  updateBulkChanging = (newState) => {
+    this.setState({ isBulkChanging: newState });
+  }
 
   config = {apiUrl:(process.env.REACT_APP_API_URL)?process.env.REACT_APP_API_URL:window.location.origin,
             wsUrl :(process.env.REACT_APP_WS_URL)?process.env.REACT_APP_WS_URL:
                     'ws://'+window.location.hostname+(window.location.port ? ':'+window.location.port: '')+'/ws',
-            addUpdateHook: this.addUpdateHook
+            addUpdateHook: this.addUpdateHook,
+            updateBulkChanging: this.updateBulkChanging
           };
-
+  generalUpdate = () => {
+    if (!this.state.bulkChanging) {
+      if (!this.state.isLoadingOrders) {
+        this.updateOrders();
+      }
+    }
+  }
   wsEvent = (event) => {
     var jEvent=JSON.parse(event);
     console.log("Websocket event: " + util.inspect(jEvent));
     if (jEvent["ccEvent"]) {
       switch (jEvent["ccEvent"]["action"]) {
         case "CREATE":
-          if (!this.state.isLoading) {
-            this.updateItems();
-          }
+          this.generalUpdate();
           break;
         case "DELETE":
-            this.updateItems();
+            this.generalUpdate();
             break;
         case "CONFIRM":
-            this.updateHooks.find(x => x.itemId===jEvent["ccEvent"]["itemId"]).updateFunc();
-            break;
-        case "APPROVE":
-            this.updateHooks.find(x => x.itemId===jEvent["ccEvent"]["itemId"]).updateFunc();
-            break;
+          this.generalUpdate();
+          break;
+        case "update":
+          this.updateHooks.filter(x=>x.itemId==jEvent["ccEvent"]["item"]).forEach(x=>x.updateFunc());
+          break;
         default:
           console.log("Got some other event");
+          this.updateHooks.filter(x=>x.itemId==jEvent["ccEvent"]["item"]).forEach(x=>x.updateFunc());
       }
     }
   }
@@ -66,21 +77,9 @@ export default class App extends Component {
         .catch(error => this.setState({ error: error, isLoadingOrders: false })); 
   }
 
-  updateShipments = async () => {
-    this.setState({ isLoadingShipments: true, shipments: [], error: null });
-    axios.get(this.config.apiUrl + '/shipment/list')
-      .then(result => 
-        this.setState({
-          shipments: result.data,
-          isLoadingShipments: false })
-        )
-        .catch(error => this.setState({ error: error, isLoadingShipments: false })); 
-  }
-
   componentDidMount = () => {
     this.updateOrders();
-    this.updateShipments();
-    console.log("Refreshed orders: " + this.state.orders);
+    //console.log("Refreshed orders: " + this.state.orders);
   }
 
   render() {
@@ -89,7 +88,7 @@ export default class App extends Component {
     return (
       <React.Fragment>      
         <Websocket url={this.config.wsUrl} onMessage={(event) => this.wsEvent(event)} />
-        <TabBar orders={this.state.orders}  shipments={this.state.shipments} config={this.config} />
+        <TabBar orders={this.state.orders} config={this.config} />
       </React.Fragment>
     );
   }

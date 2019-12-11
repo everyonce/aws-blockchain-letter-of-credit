@@ -4,9 +4,13 @@ import {CubeIcon, ChainLink} from './Icons';
 import moment from 'moment';
 
     export default function StatusChain(props) {
+        if (!props.history) {
+            return (<h4>No History</h4>);
+        }
 return (
             <div style={{display: 'flex', margin: '0px', alignItems: 'center', textAlign: 'center'}}>
-              {props.history.map((x, i) => 
+              {
+              props.history.map((x, i) => 
                 { 
                     var link=''; 
                     var c={topfill:'#80ACCA',rightfill:'#4083AF',leftfill:'#005A95'}; 
@@ -25,7 +29,7 @@ return (
                         </div>
                     </Tooltip>
                     </React.Fragment>);
-              })
+                })
             }
               </div>
         )

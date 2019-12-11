@@ -9,6 +9,7 @@ import StatusChain from './StatusChain';
 import getStatusTypes from './StatusTypes';
 import ShowActor from './ShowActor';
 import axios from 'axios';
+import util from 'util';
 
 const fetchShipment = async (id, apiUrl) => {
   const response = await axios.get(apiUrl + '/shipment/get/' + id);
@@ -25,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     }
   }));
 export default function OrderFulfillment(props) {
+  console.log("OrderFulfillment got props.shipments: " + util.inspect(props.shipments));
     let rows = [];
     props.order.data.lineItems.forEach(
        lineItem => {
@@ -33,7 +35,7 @@ export default function OrderFulfillment(props) {
         newRow.shipped=0;
         console.log("about to loop shipments: " + props.shipments.length);
         (props.shipments || []).forEach(
-          async shipment => {
+           shipment => {
             console.log("looping shipments: " + shipment);
             shipment.data.shipmentItems.filter(x=>x.sku==lineItem.sku).forEach(
               shipmentItem => {
@@ -68,7 +70,7 @@ export default function OrderFulfillment(props) {
           </TableHead>
           <TableBody>
             {rows.map(row => (
-              <TableRow key={row.name}>
+              <TableRow key={props.order.id + '-' + row.sku}>
                 <TableCell component="th" scope="row">
                   {row.sku}
                 </TableCell>

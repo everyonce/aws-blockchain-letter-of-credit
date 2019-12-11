@@ -78,6 +78,25 @@ export default function SampleData(memberId) {
           },
         ]
       }
+    },
+    {
+      "id":uuidv4(),
+      "docType":"SHIPMENT",
+      "data":{
+        
+        "shipmentItems":[
+          {
+            "orderId":id1,
+            "sku": "iPhone6S_Display",
+            "quantity":"30"
+          },
+          {
+            "orderId":id2,
+            "sku": "GalaxyNote3",
+            "quantity":"2"
+          },
+        ]
+      }
     }
   ];
 

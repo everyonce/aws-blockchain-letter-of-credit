@@ -186,7 +186,7 @@ func createEventHub() {
 	}
 	defer close()
 
-	reg, channel, err := client.RegisterChaincodeEvent(viper.GetString("fabric.chaincode"), "letterAction")
+	reg, channel, err := client.RegisterChaincodeEvent(viper.GetString("fabric.chaincode"), ".*")
 	if err != nil {
 		log.Printf("failed to register chaincode event: %v\n", err)
 	}

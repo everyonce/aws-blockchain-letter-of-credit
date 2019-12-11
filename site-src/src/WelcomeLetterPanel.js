@@ -15,8 +15,8 @@ export default function CreateWelcomePage(props) {
       
       newItems.reduce((promiseChain, item) =>
         promiseChain.then(() => 
-          {console.log("setcreating true"); setCreating(true); return axios.post(props.config.apiUrl + '/'+ item.docType.toLowerCase() + '/create', item);}), Promise.resolve())
-      .then(() => {console.log("setcreating false"); setCreating(false);});
+          {console.log("setcreating true"); props.config.updateBulkChanging(true); setCreating(true); return axios.post(props.config.apiUrl + '/'+ item.docType.toLowerCase() + '/create', item);}), Promise.resolve())
+      .then(() => {console.log("setcreating false"); setCreating(false); props.config.updateBulkChanging(true); });
      };
      const [deleting, setDeleting] = React.useState(false);
      let deleteAll=(values) => {

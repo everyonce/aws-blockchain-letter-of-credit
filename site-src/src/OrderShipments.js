@@ -29,7 +29,7 @@ export default function OrderShipments(props) {
         </TableHead>
         <TableBody>
           {props.shipments.map(row => 
-          <React.Fragment width={1}>
+          <React.Fragment>
             <TableRow key={row.id}>
               <TableCell scope="row"  align="left">
                 {row.id}
